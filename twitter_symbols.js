@@ -6,6 +6,8 @@
 //2010-06-20 1.0.5 ボタンのキャプションの文字サイズを大きくした。
 //2010-06-21 1.0.6 シンボルテーブルが、半透明にならないようにした。
 //2010-06-22 1.0.7 主要処理を実行するタイミングを変更して、確実に実行できるように修正した。ログを出力するように修正した。
+//2010-08-03 1.0.8 added Japanese Face Marks. and able to edit face marks. Enjoy!
+//2010-08-05 1.0.9 be able to use http://twipple.jp/ too.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
