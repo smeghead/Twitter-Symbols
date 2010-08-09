@@ -1,0 +1,40 @@
+table#symbols {
+  position: absolute;
+  z-index: 100;
+  display: none;
+}
+table#symbols,
+table#symbols td {
+  margin: 1px;
+  padding: 1px;
+  border-collapse: collapse;
+  border: 1px solid gray;
+  color: #333;
+  background-color: white;
+  font-size: 14pt;
+}
+table#symbols td {
+  width: 20px;
+  text-align: center;
+}
+table#symbols td.facemark {
+  font-size: 14px;
+}
+table#symbols td:hover {
+  color: white;
+  background-color: gray;
+  cursor: pointer;
+}
+a.twipple-smile-link {
+  color: gray;
+  background-color: #eee;
+  -webkit-border-radius: 1px;
+  text-decoration: none;
+}
+a.twipple-smile-link span {
+  color: gray;
+}
+a.twipple-smile-link:hover {
+  text-decoration: none;
+}
+/* vim: set ts=2 sw=2 sts=2 expandtab fenc=utf-8: */
