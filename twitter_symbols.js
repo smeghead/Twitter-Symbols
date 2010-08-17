@@ -142,6 +142,16 @@ function register_scripts() {
             if (i % cols_num_smile == cols_num_smile - 1 || i == options.smiles.length - 1) 
               symbol_table.appendChild(tr);
           }
+          //options link.
+          var text = document.createTextNode();
+          text.nodeValue = 'You can add and edit smile marks in options page.';
+          var td = document.createElement('td');
+          td.setAttribute('colspan', cols_num);
+          td.setAttribute('class', 'description');
+          td.appendChild(text);
+          tr = document.createElement('tr');
+          tr.appendChild(td);
+          symbol_table.appendChild(tr);
 
           var smile_link = generate_smile_link();
           smile_link.setAttribute(

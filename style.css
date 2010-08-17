@@ -20,6 +20,15 @@ table#symbols td {
 table#symbols td.facemark {
   font-size: 14px;
 }
+table#symbols td.description {
+  font-size: 9px;
+  cursor: default;
+}
+table#symbols td:hover.description {
+  color: #333;
+  background-color: white;
+  cursor: default;
+}
 table#symbols td:hover {
   color: white;
   background-color: gray;
