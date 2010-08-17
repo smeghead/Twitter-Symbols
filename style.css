@@ -5,10 +5,10 @@ table#symbols {
 }
 table#symbols,
 table#symbols td {
-  margin: 1px;
-  padding: 1px;
-  border-collapse: collapse;
-  border: 1px solid gray;
+  margin: 1px !important;
+  padding: 1px !important;
+  border-collapse: collapse !important;
+  border: 1px solid gray !important;
   color: #333;
   background-color: white;
   font-size: 14pt;

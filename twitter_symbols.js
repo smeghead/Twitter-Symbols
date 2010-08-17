@@ -88,8 +88,6 @@ if (location.hostname.match(/twitter/)) {
   throw new Exception('unknown url.');
 }
 
-console.log(generate_smile_link.toString());
-
 function register_scripts() {
   var globalScript = "(" + (function(){
         console.log('Twitter Symbols: global script start.');
@@ -160,8 +158,6 @@ function register_scripts() {
   }).toString() + ")();";
 
   //スクリプトノード追加
-  console.log('json:' + JSON.stringify(options));
-  console.log(generate_smile_link);
   exportToSite('var options = ' + JSON.stringify(options) + ';', globalScript, search_status_box, generate_smile_link, setup_smile_link);
   console.log('Twitter Symbols: initialize end.');
 }
