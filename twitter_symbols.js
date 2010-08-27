@@ -11,6 +11,7 @@
 //2010-08-17 1.0.10 modified css.
 //2010-08-17 1.0.11 add options information.
 //2010-08-27 1.0.12 be able to use http://hootsuite.com/
+//2010-08-27 1.0.13 fixed a bug after posted, smile button disapeared. in hootsuite page.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -19,8 +20,6 @@ var options = {};
 //オプション設定項目の取得
 console.log('request send');
 chrome.extension.sendRequest("get_ts_options", function(response) {
-  console.log('response got');
-  console.log(response);
   options = response.options;
   register_scripts();
 });
@@ -98,7 +97,8 @@ if (location.hostname.match(/twitter/)) {
     smile_link.appendChild(span);
     return smile_link;
   };
-  setup_smile_link = function setup_smile_link(smile_link, symbol_table) {
+  setup_smile_link = function setup_smile_link(smile_link, symbol_table, callee) {
+    console.log('setup_smile_link.');
     var buttons = document.getElementById('messageTools');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
@@ -109,6 +109,16 @@ if (location.hostname.match(/twitter/)) {
     symbol_table.setAttribute('top', smile_link.top + smile_link.height);
     symbol_table.setAttribute('left', smile_link.left);
     symbol_table.style.display = 'none';
+    // check symbol table. if deleted symbol table, recreate.
+    if (document.twitter_symbols___timer == undefined) {
+      console.log('check register.');
+      document.twitter_symbols___timer = setInterval(function(){
+        if (!document.getElementById('symbols')) {
+          callee();
+        }
+      }, 5000);
+      console.log('check registered.');
+    }
   };
 } else {
   throw new Exception('unknown url.');
@@ -117,6 +127,7 @@ if (location.hostname.match(/twitter/)) {
 function register_scripts() {
   var globalScript = "(" + (function(){
         console.log('Twitter Symbols: global script start.');
+        var callee = arguments.callee;
         var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?';
         var cols_num = 15;
         var cols_num_smile = 3;
@@ -184,7 +195,7 @@ function register_scripts() {
               smile_link.tagName.toLowerCase() == 'a' ? 'href' : 'onClick',
               'javascript:var s = document.getElementById("symbols"); s.style.display = s.style.display == "none" ? "inline" : "none";');
 
-          setup_smile_link(smile_link, symbol_table);
+          setup_smile_link(smile_link, symbol_table, callee);
           var body = document.getElementsByTagName('body')[0];
           body.addEventListener('click', function(){var s = document.getElementById("symbols"); if (s.style.display == "inline") s.style.display = "none";}, false);
         } catch (e) {
