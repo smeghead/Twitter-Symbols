@@ -8,6 +8,9 @@
 //2010-06-22 1.0.7 主要処理を実行するタイミングを変更して、確実に実行できるように修正した。ログを出力するように修正した。
 //2010-08-03 1.0.8 added Japanese Face Marks. and able to edit face marks. Enjoy!
 //2010-08-05 1.0.9 be able to use http://twipple.jp/ too.
+//2010-08-17 1.0.10 modified css.
+//2010-08-17 1.0.11 add options information.
+//2010-08-27 1.0.12 be able to use http://hootsuite.com/
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -58,10 +61,6 @@ if (location.hostname.match(/twitter/)) {
     return document.getElementById('input');
   };
   generate_smile_link = function generate_smile_link() {
-//    var smile_link = document.createElement('input');
-//    smile_link.setAttribute('type', 'button');
-//    smile_link.setAttribute('class', 'mb5');
-//    smile_link.setAttribute('value', '☺');
     var smile_link = document.createElement('a');
     smile_link.setAttribute('class', 'twipple-smile-link');
     var span = document.createElement('span');
@@ -74,6 +73,34 @@ if (location.hostname.match(/twitter/)) {
   };
   setup_smile_link = function setup_smile_link(smile_link, symbol_table) {
     var buttons = document.getElementById('postarea_inRight');
+    if (!buttons) {
+      console.log('Twitter Symbols: no buttons. setup stop.');
+      return;
+    }
+    buttons.insertBefore(smile_link, buttons.firstChild);
+    buttons.insertBefore(symbol_table, buttons.firstChild);
+    symbol_table.setAttribute('top', smile_link.top + smile_link.height);
+    symbol_table.setAttribute('left', smile_link.left);
+    symbol_table.style.display = 'none';
+  };
+} else if (location.hostname.match(/hootsuite/)) {
+  //hootsuite
+  search_status_box = function search_status_box() {
+    return document.getElementById('messageBoxMessage');
+  };
+  generate_smile_link = function generate_smile_link() {
+    var smile_link = document.createElement('a');
+    smile_link.setAttribute('class', '_scheduleMessage scheduleMessage _bubblePopup _jsTooltip icon-30');
+    var span = document.createElement('span');
+    var button_caption = document.createTextNode();
+    button_caption.nodeValue = '☺';
+    span.appendChild(button_caption);
+    span.setAttribute('style', 'font-size:15pt;');
+    smile_link.appendChild(span);
+    return smile_link;
+  };
+  setup_smile_link = function setup_smile_link(smile_link, symbol_table) {
+    var buttons = document.getElementById('messageTools');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
       return;

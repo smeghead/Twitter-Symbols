@@ -12,7 +12,9 @@
         "https://twitter.com/*",
         "https://twitter.com/",
         "http://twipple.jp/",
-        "https://twipple.jp/"
+        "https://twipple.jp/",
+        "http://hootsuite.com/dashboard",
+        "https://hootsuite.com/dashboard"
       ],
       "js": ["twitter_symbols.js"],
       "run_at": "document_end",
