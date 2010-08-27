@@ -90,12 +90,11 @@ if (location.hostname.match(/twitter/)) {
   };
   generate_smile_link = function generate_smile_link() {
     var smile_link = document.createElement('a');
-    smile_link.setAttribute('class', '_scheduleMessage scheduleMessage _bubblePopup _jsTooltip icon-30');
+    smile_link.setAttribute('class', 'hootsuite-smile-link');
     var span = document.createElement('span');
     var button_caption = document.createTextNode();
     button_caption.nodeValue = '☺';
     span.appendChild(button_caption);
-    span.setAttribute('style', 'font-size:15pt;');
     smile_link.appendChild(span);
     return smile_link;
   };
@@ -105,8 +104,8 @@ if (location.hostname.match(/twitter/)) {
       console.log('Twitter Symbols: no buttons. setup stop.');
       return;
     }
-    buttons.insertBefore(smile_link, buttons.firstChild);
     buttons.insertBefore(symbol_table, buttons.firstChild);
+    buttons.insertBefore(smile_link, buttons.firstChild);
     symbol_table.setAttribute('top', smile_link.top + smile_link.height);
     symbol_table.setAttribute('left', smile_link.left);
     symbol_table.style.display = 'none';

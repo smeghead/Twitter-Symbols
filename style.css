@@ -46,4 +46,13 @@ a.twipple-smile-link span {
 a.twipple-smile-link:hover {
   text-decoration: none;
 }
+a.hootsuite-smile-link {
+}
+a.hootsuite-smile-link span {
+  color: #333;
+  font-size: 25px !important;
+}
+a.hootsuite-smile-link:hover {
+  text-decoration: none;
+}
 /* vim: set ts=2 sw=2 sts=2 expandtab fenc=utf-8: */
