@@ -12,6 +12,7 @@
 //2010-08-17 1.0.11 add options information.
 //2010-08-27 1.0.12 be able to use http://hootsuite.com/
 //2010-08-27 1.0.13 fixed a bug after posted, smile button disapeared. in hootsuite page.
+//2010-08-28 1.0.14 supported facemarks quoted.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -170,8 +171,12 @@ function register_scripts() {
             td.appendChild(text);
             td.addEventListener('click', function(){
                 var pos = statusBox.selectionStart;
-                statusBox.value = statusBox.value.substring(0, pos) + this.innerText + statusBox.value.substring(pos);
-                statusBox.selectionStart = pos + this.innerText.length;
+                var facemark = this.innerText;
+                if (facemark.match(/^".*"$/)) {
+                  facemark = facemark.substring(1, facemark.length -1);
+                }
+                statusBox.value = statusBox.value.substring(0, pos) + facemark + statusBox.value.substring(pos);
+                statusBox.selectionStart = pos + facemark.length;
                 var s = document.getElementById("symbols");
                 s.style.display = s.style.display != "inline" ? "inline" : "none";
                 }, false);
