@@ -14,6 +14,7 @@
 //2010-08-27 1.0.13 fixed a bug after posted, smile button disapeared. in hootsuite page.
 //2010-08-28 1.0.14 supported facemarks quoted.
 //2010-10-03 1.0.15 supported new twitter ui.
+//2010-10-03 1.0.16 fixed a bug that create too many smile buttons.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -49,6 +50,8 @@ if (location.hostname.match(/twitter/)) {
       return;
     }
     var as = buttons.getElementsByTagName('a');
+    // if symbol table has already inserted, exit function.
+    if (as.length > 2) return;
     console.log('as:' + as.length);
     var tweet = as[as.length - 1];
     console.log('tweet:' + tweet.outerHTML);
