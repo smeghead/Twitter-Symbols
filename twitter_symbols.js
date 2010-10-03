@@ -15,6 +15,7 @@
 //2010-08-28 1.0.14 supported facemarks quoted.
 //2010-10-03 1.0.15 supported new twitter ui.
 //2010-10-03 1.0.16 fixed a bug that create too many smile buttons.
+//2010-10-03 1.0.17 fixed a bug that create too many smile buttons in hootsuite.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -121,7 +122,18 @@ if (location.hostname.match(/twitter/)) {
     if (document.twitter_symbols___timer == undefined) {
       console.log('check register.');
       document.twitter_symbols___timer = setInterval(function(){
-        if (!document.getElementById('symbols')) {
+        console.log('check 1.');
+
+        var links = document.getElementsByTagName('a');
+        console.log('check 2.');
+        var exists = false;
+        for (var i = 0; i < links.length; i++) {
+          if (links[i].className.indexOf('hootsuite-smile-link') > -1) {
+            exists = true;
+          }
+        }
+        console.log('check 3.' + exists);
+        if (!exists) {
           callee();
         }
       }, 5000);
@@ -227,22 +239,22 @@ function register_scripts() {
     body.addEventListener('DOMNodeInserted', function(event){
       var divs = event.target.getElementsByTagName('div');
       for (var i = 0; i < divs.length; i++) {
-        var d = divs[i];
-        if (d.className.indexOf('tweet-button-container') > -1) {
-          console.log('=====new edit area inserted.');
-          console.log('inserted. ' + d.parentElement.outerHTML);
-          var cont = d;
-          setTimeout(function(){
-            console.log('timeout called. ' + cont.parentElement.outerHTML);
-            var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
-            console.log('elements search. ');
-            if (textareaNodeList.length == 0) break;
-            var statusBox = textareaNodeList.item(0);
-            console.log('statusbox : ' + statusBox);
-            console.log('start : ' + statusBox.selectionStart);
-            create_symbol_tables(statusBox, cont);
+      var d = divs[i];
+      if (d.className.indexOf('tweet-button-container') > -1) {
+        console.log('=====new edit area inserted.');
+        console.log('inserted. ' + d.parentElement.outerHTML);
+        var cont = d;
+        setTimeout(function(){
+          console.log('timeout called. ' + cont.parentElement.outerHTML);
+          var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
+          console.log('elements search. ');
+          if (textareaNodeList.length == 0) break;
+          var statusBox = textareaNodeList.item(0);
+          console.log('statusbox : ' + statusBox);
+          console.log('start : ' + statusBox.selectionStart);
+          create_symbol_tables(statusBox, cont);
           }, 500);
-          console.log('set timeout. ');
+        console.log('set timeout. ');
         }
       }
     });

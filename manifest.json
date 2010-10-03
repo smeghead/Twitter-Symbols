@@ -1,6 +1,6 @@
 {
   "name": "Twitter Symbols",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "At Twitter official web site(or hootsuite, twipple), support to insert symbols.",
   "icons": { "48": "icon.png" },
   "content_scripts": [
