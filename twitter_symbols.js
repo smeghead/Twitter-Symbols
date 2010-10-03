@@ -13,6 +13,7 @@
 //2010-08-27 1.0.12 be able to use http://hootsuite.com/
 //2010-08-27 1.0.13 fixed a bug after posted, smile button disapeared. in hootsuite page.
 //2010-08-28 1.0.14 supported facemarks quoted.
+//2010-10-03 1.0.15 supported new twitter ui.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -29,31 +30,34 @@ console.log('request sent');
 var search_status_box, generate_smile_link, setup_smile_link;
 if (location.hostname.match(/twitter/)) {
   //Twitter
-  search_status_box = function search_status_box() {
+  search_status_box = function search_status_box(statusBox) {
     return document.getElementById('status');
   };
   generate_smile_link = function generate_smile_link() {
     var smile_link = document.createElement('a');
-    smile_link.setAttribute('class', 'a-btn a-btn-m');
-    var span = document.createElement('span');
+    //smile_link.setAttribute('class', 'smily-button tweet-button button');
+    smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button button');
     var button_caption = document.createTextNode();
     button_caption.nodeValue = '☺';
-    span.appendChild(button_caption);
-    span.setAttribute('style', 'font-size:15pt;');
-    smile_link.appendChild(span);
+    smile_link.appendChild(button_caption);
     return smile_link;
   };
-  setup_smile_link = function setup_smile_link(smile_link, symbol_table) {
-    var buttons = document.getElementById('tweeting_controls');
+  setup_smile_link = function setup_smile_link(smile_link, symbol_table, callee, buttons) {
+    var buttons = buttons || document.getElementById('tweeting_controls');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
       return;
     }
-    buttons.insertBefore(smile_link, buttons.firstChild);
-    buttons.appendChild(symbol_table);
+    var as = buttons.getElementsByTagName('a');
+    console.log('as:' + as.length);
+    var tweet = as[as.length - 1];
+    console.log('tweet:' + tweet.outerHTML);
+    buttons.insertBefore(smile_link, tweet);
+    buttons.insertBefore(symbol_table, tweet);
     symbol_table.setAttribute('top', smile_link.top + smile_link.height);
     symbol_table.setAttribute('left', smile_link.left);
     symbol_table.style.display = 'none';
+    console.log('had setup');
   };
 } else if (location.hostname.match(/twipple/)) {
   //Twipple
@@ -125,92 +129,125 @@ if (location.hostname.match(/twitter/)) {
   throw new Exception('unknown url.');
 }
 
-function register_scripts() {
-  var globalScript = "(" + (function(){
-        console.log('Twitter Symbols: global script start.');
-        var callee = arguments.callee;
-        var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?';
-        var cols_num = 15;
-        var cols_num_smile = 3;
-        try {
-          var statusBox = search_status_box();
+function create_symbol_tables(status, container) {
+  var callee = arguments.callee;
+  var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?';
+  var cols_num = 15;
+  var cols_num_smile = 3;
+  var symbols_id = 'symbol_table' + new Date().getTime();
+  try {
+    var symbol_table = document.createElement('table');
+    symbol_table.setAttribute('id', symbols_id);
+    symbol_table.setAttribute('class', 'symbols');
+    var tr = document.createElement('tr');
+    for (var i = 0; i < symbols.length; i++) {
+      var td = document.createElement('td');
+      if (i % cols_num == 0) 
+        tr = document.createElement('tr');
+      var text = document.createTextNode();
+      text.nodeValue = symbols[i];
+      td.appendChild(text);
+      td.addEventListener('click', function(){
+          var statusBox = status || search_status_box();
           if (!statusBox) {
             console.log('Twitter Symbols: no status box. setup stop.');
             return;
           }
-          var symbol_table = document.createElement('table');
-          symbol_table.setAttribute('id','symbols');
-          var tr = document.createElement('tr');
-          for (var i = 0; i < symbols.length; i++) {
-            var td = document.createElement('td');
-            if (i % cols_num == 0) 
-              tr = document.createElement('tr');
-            var text = document.createTextNode();
-            text.nodeValue = symbols[i];
-            td.appendChild(text);
-            td.addEventListener('click', function(){
-                var pos = statusBox.selectionStart;
-                statusBox.value = statusBox.value.substring(0, pos) + this.innerText + statusBox.value.substring(pos);
-                statusBox.selectionStart = pos + this.innerText.length;
-                var s = document.getElementById("symbols");
-                s.style.display = s.style.display != "inline" ? "inline" : "none";
-                }, false);
-            tr.appendChild(td);
-            if (i % cols_num == cols_num - 1 || i == symbols.length - 1) 
-              symbol_table.appendChild(tr);
+          var pos = statusBox.selectionStart;
+          statusBox.value = statusBox.value.substring(0, pos) + this.innerText + statusBox.value.substring(pos);
+          statusBox.selectionStart = pos + this.innerText.length;
+          var s = document.getElementById(symbols_id);
+          s.style.display = s.style.display != "inline" ? "inline" : "none";
+      }, false);
+      tr.appendChild(td);
+      if (i % cols_num == cols_num - 1 || i == symbols.length - 1) 
+        symbol_table.appendChild(tr);
+    }
+    //smile marks
+    for (var i = 0; i < options.smiles.length; i++) {
+      var td = document.createElement('td');
+      td.setAttribute('colspan', '5');
+      td.setAttribute('class', 'facemark');
+      if (i % cols_num_smile == 0) 
+        tr = document.createElement('tr');
+      var text = document.createTextNode();
+      text.nodeValue = options.smiles[i];
+      td.appendChild(text);
+      td.addEventListener('click', function(){
+          var statusBox = status || search_status_box(statusBox);
+          if (!statusBox) {
+            console.log('Twitter Symbols: no status box. setup stop.');
+            return;
           }
-          //smile marks
-          for (var i = 0; i < options.smiles.length; i++) {
-            var td = document.createElement('td');
-            td.setAttribute('colspan', '5');
-            td.setAttribute('class', 'facemark');
-            if (i % cols_num_smile == 0) 
-              tr = document.createElement('tr');
-            var text = document.createTextNode();
-            text.nodeValue = options.smiles[i];
-            td.appendChild(text);
-            td.addEventListener('click', function(){
-                var pos = statusBox.selectionStart;
-                var facemark = this.innerText;
-                if (facemark.match(/^".*"$/)) {
-                  facemark = facemark.substring(1, facemark.length -1);
-                }
-                statusBox.value = statusBox.value.substring(0, pos) + facemark + statusBox.value.substring(pos);
-                statusBox.selectionStart = pos + facemark.length;
-                var s = document.getElementById("symbols");
-                s.style.display = s.style.display != "inline" ? "inline" : "none";
-                }, false);
-            tr.appendChild(td);
-            if (i % cols_num_smile == cols_num_smile - 1 || i == options.smiles.length - 1) 
-              symbol_table.appendChild(tr);
+          var pos = statusBox.selectionStart;
+          var facemark = this.innerText;
+          if (facemark.match(/^".*"$/)) {
+            facemark = facemark.substring(1, facemark.length -1);
           }
-          //options link.
-          var text = document.createTextNode();
-          text.nodeValue = 'You can add and edit smile marks in options page.';
-          var td = document.createElement('td');
-          td.setAttribute('colspan', cols_num);
-          td.setAttribute('class', 'description');
-          td.appendChild(text);
-          tr = document.createElement('tr');
-          tr.appendChild(td);
-          symbol_table.appendChild(tr);
+          statusBox.value = statusBox.value.substring(0, pos) + facemark + statusBox.value.substring(pos);
+          statusBox.selectionStart = pos + facemark.length;
+          var s = document.getElementById(symbols_id);
+          s.style.display = s.style.display != "inline" ? "inline" : "none";
+      }, false);
+      tr.appendChild(td);
+      if (i % cols_num_smile == cols_num_smile - 1 || i == options.smiles.length - 1) 
+        symbol_table.appendChild(tr);
+    }
+    //options link.
+    var text = document.createTextNode();
+    text.nodeValue = 'You can add and edit smile marks in options page.';
+    var td = document.createElement('td');
+    td.setAttribute('colspan', cols_num);
+    td.setAttribute('class', 'description');
+    td.appendChild(text);
+    tr = document.createElement('tr');
+    tr.appendChild(td);
+    symbol_table.appendChild(tr);
 
-          var smile_link = generate_smile_link();
-          smile_link.setAttribute(
-              smile_link.tagName.toLowerCase() == 'a' ? 'href' : 'onClick',
-              'javascript:var s = document.getElementById("symbols"); s.style.display = s.style.display == "none" ? "inline" : "none";');
+    var smile_link = generate_smile_link();
+    smile_link.setAttribute(
+        smile_link.tagName.toLowerCase() == 'a' ? 'href' : 'onClick',
+        'javascript:var s = document.getElementById("' + symbols_id + '"); s.style.display = s.style.display == "none" ? "inline" : "none";');
 
-          setup_smile_link(smile_link, symbol_table, callee);
-          var body = document.getElementsByTagName('body')[0];
-          body.addEventListener('click', function(){var s = document.getElementById("symbols"); if (s.style.display == "inline") s.style.display = "none";}, false);
-        } catch (e) {
-          console.log('Twitter Symbols: ' + e);
+    setup_smile_link(smile_link, symbol_table, callee, container);
+    var body = document.getElementsByTagName('body')[0];
+    body.addEventListener('click', function(){var s = document.getElementById(symbols_id); if (s.style.display == "inline") s.style.display = "none";}, false);
+  } catch (e) {
+    console.log('Twitter Symbols: ' + e);
+  }
+}
+function register_scripts() {
+  var globalScript = "(" + (function(){
+    console.log('Twitter Symbols: global script start.');
+    create_symbol_tables();
+    var body = document.getElementsByTagName('body')[0];
+    body.addEventListener('DOMNodeInserted', function(event){
+      var divs = event.target.getElementsByTagName('div');
+      for (var i = 0; i < divs.length; i++) {
+        var d = divs[i];
+        if (d.className.indexOf('tweet-button-container') > -1) {
+          console.log('=====new edit area inserted.');
+          console.log('inserted. ' + d.parentElement.outerHTML);
+          var cont = d;
+          setTimeout(function(){
+            console.log('timeout called. ' + cont.parentElement.outerHTML);
+            var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
+            console.log('elements search. ');
+            if (textareaNodeList.length == 0) break;
+            var statusBox = textareaNodeList.item(0);
+            console.log('statusbox : ' + statusBox);
+            console.log('start : ' + statusBox.selectionStart);
+            create_symbol_tables(statusBox, cont);
+          }, 500);
+          console.log('set timeout. ');
         }
-        console.log('Twitter Symbols: global script end.');
+      }
+    });
+    console.log('Twitter Symbols: global script end.');
   }).toString() + ")();";
 
   //スクリプトノード追加
-  exportToSite('var options = ' + JSON.stringify(options) + ';', globalScript, search_status_box, generate_smile_link, setup_smile_link);
+  exportToSite('var options = ' + JSON.stringify(options) + ';', globalScript, search_status_box, generate_smile_link, setup_smile_link, create_symbol_tables);
   console.log('Twitter Symbols: initialize end.');
 }
 

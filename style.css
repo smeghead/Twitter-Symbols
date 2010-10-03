@@ -1,10 +1,10 @@
-table#symbols {
+table.symbols {
   position: absolute;
   z-index: 100;
   display: none;
 }
-table#symbols,
-table#symbols td {
+table.symbols,
+table.symbols td {
   margin: 1px !important;
   padding: 1px !important;
   border-collapse: collapse !important;
@@ -13,23 +13,23 @@ table#symbols td {
   background-color: white;
   font-size: 14pt;
 }
-table#symbols td {
+table.symbols td {
   width: 20px;
   text-align: center;
 }
-table#symbols td.facemark {
+table.symbols td.facemark {
   font-size: 14px;
 }
-table#symbols td.description {
+table.symbols td.description {
   font-size: 9px;
   cursor: default;
 }
-table#symbols td:hover.description {
+table.symbols td:hover.description {
   color: #333;
   background-color: white;
   cursor: default;
 }
-table#symbols td:hover {
+table.symbols td:hover {
   color: white;
   background-color: gray;
   cursor: pointer;
@@ -54,5 +54,17 @@ a.hootsuite-smile-link span {
 }
 a.hootsuite-smile-link:hover {
   text-decoration: none;
+}
+a.smily-button {
+  font-size: 18px;
+/*  height: 11px;*/
+/*  width: 18px;*/
+  text-align: center;
+}
+a.tweet-button {
+  margin-left: 3px;
+}
+a#tweeting_button {
+  margin-left: 3px;
 }
 /* vim: set ts=2 sw=2 sts=2 expandtab fenc=utf-8: */
