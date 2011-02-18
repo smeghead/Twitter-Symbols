@@ -8,7 +8,7 @@ function get_ts_options() {
       'smiles': smiles
     };
     if (smiles.length == 0) {
-      options.smiles = ['(^_^)', '(>_<)', '(^_^;)', '(ToT)', 'm(_ _)m', '\\(^^)/'];
+      options.smiles = ['(^_^)', '(>_<)', '(^_^;)', '(ToT)', 'm(_ _)m', '\\(^^)/', '#twitter_symbols'];
     }
   
     //save

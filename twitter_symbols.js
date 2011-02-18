@@ -22,12 +22,10 @@ console.log('Twitter Symbols: initialize start.');
 
 var options = {};
 //オプション設定項目の取得
-console.log('request send');
 chrome.extension.sendRequest("get_ts_options", function(response) {
   options = response.options;
   register_scripts();
 });
-console.log('request sent');
 
 var search_status_box, generate_smile_link, setup_smile_link;
 if (location.hostname.match(/twitter/)) {
@@ -53,15 +51,12 @@ if (location.hostname.match(/twitter/)) {
     var as = buttons.getElementsByTagName('a');
     // if symbol table has already inserted, exit function.
     if (as.length > 2) return;
-    console.log('as:' + as.length);
     var tweet = as[as.length - 1];
-    console.log('tweet:' + tweet.outerHTML);
     buttons.insertBefore(smile_link, tweet);
     buttons.insertBefore(symbol_table, tweet);
     symbol_table.setAttribute('top', smile_link.top + smile_link.height);
     symbol_table.setAttribute('left', smile_link.left);
     symbol_table.style.display = 'none';
-    console.log('had setup');
   };
 } else if (location.hostname.match(/twipple/)) {
   //Twipple
@@ -107,7 +102,6 @@ if (location.hostname.match(/twitter/)) {
     return smile_link;
   };
   setup_smile_link = function setup_smile_link(smile_link, symbol_table, callee) {
-    console.log('setup_smile_link.');
     var buttons = document.getElementById('messageTools');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
@@ -120,24 +114,18 @@ if (location.hostname.match(/twitter/)) {
     symbol_table.style.display = 'none';
     // check symbol table. if deleted symbol table, recreate.
     if (document.twitter_symbols___timer == undefined) {
-      console.log('check register.');
       document.twitter_symbols___timer = setInterval(function(){
-        console.log('check 1.');
-
         var links = document.getElementsByTagName('a');
-        console.log('check 2.');
         var exists = false;
         for (var i = 0; i < links.length; i++) {
           if (links[i].className.indexOf('hootsuite-smile-link') > -1) {
             exists = true;
           }
         }
-        console.log('check 3.' + exists);
         if (!exists) {
           callee();
         }
       }, 5000);
-      console.log('check registered.');
     }
   };
 } else {
@@ -241,20 +229,13 @@ function register_scripts() {
       for (var i = 0; i < divs.length; i++) {
       var d = divs[i];
       if (d.className.indexOf('tweet-button-container') > -1) {
-        console.log('=====new edit area inserted.');
-        console.log('inserted. ' + d.parentElement.outerHTML);
         var cont = d;
         setTimeout(function(){
-          console.log('timeout called. ' + cont.parentElement.outerHTML);
           var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
-          console.log('elements search. ');
           if (textareaNodeList.length == 0) return;
           var statusBox = textareaNodeList.item(0);
-          console.log('statusbox : ' + statusBox);
-          console.log('start : ' + statusBox.selectionStart);
           create_symbol_tables(statusBox, cont);
           }, 500);
-        console.log('set timeout. ');
         }
       }
     });

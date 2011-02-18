@@ -18,7 +18,8 @@ table.symbols td {
   text-align: center;
 }
 table.symbols td.facemark {
-  font-size: 14px;
+  font-size: 13px;
+  overflow: hidden;
 }
 table.symbols td.description {
   font-size: 9px;
