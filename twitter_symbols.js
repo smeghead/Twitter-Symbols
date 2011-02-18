@@ -248,7 +248,7 @@ function register_scripts() {
           console.log('timeout called. ' + cont.parentElement.outerHTML);
           var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
           console.log('elements search. ');
-          if (textareaNodeList.length == 0) break;
+          if (textareaNodeList.length == 0) return;
           var statusBox = textareaNodeList.item(0);
           console.log('statusbox : ' + statusBox);
           console.log('start : ' + statusBox.selectionStart);

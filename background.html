@@ -3,10 +3,7 @@
   <head>
     <script type="text/javascript" src="options.js"></script>
     <script type="text/javascript">
-console.log('background pass');
-console.log('onRequest register');
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-console.log('request got');
     if (request == "get_ts_options") {
       sendResponse({options: get_ts_options()});
     }
