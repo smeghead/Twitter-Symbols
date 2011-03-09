@@ -227,15 +227,15 @@ function register_scripts() {
     body.addEventListener('DOMNodeInserted', function(event){
       var divs = event.target.getElementsByTagName('div');
       for (var i = 0; i < divs.length; i++) {
-      var d = divs[i];
-      if (d.className.indexOf('tweet-button-container') > -1) {
-        var cont = d;
-        setTimeout(function(){
-          var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
-          if (textareaNodeList.length == 0) return;
-          var statusBox = textareaNodeList.item(0);
-          create_symbol_tables(statusBox, cont);
-          }, 500);
+        var d = divs[i];
+        if (d.className.indexOf('tweet-button-container') > -1) {
+          var cont = d;
+          setTimeout(function(){
+            var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
+            if (textareaNodeList.length == 0) return;
+            var statusBox = textareaNodeList.item(0);
+            create_symbol_tables(statusBox, cont);
+            }, 500);
         }
       }
     });
