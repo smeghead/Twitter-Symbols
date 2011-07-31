@@ -16,6 +16,9 @@
 //2010-10-03 1.0.15 supported new twitter ui.
 //2010-10-03 1.0.16 fixed a bug that create too many smile buttons.
 //2010-10-03 1.0.17 fixed a bug that create too many smile buttons in hootsuite.
+//2011-02-18 1.0.18 fixed a bug that smile button does'nt appear.
+//2011-04-28 1.0.19 added coffee cup symbol.
+//2011-07-28 1.0.20 supported with DOM structure changed in official twitter site.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -48,10 +51,8 @@ if (location.hostname.match(/twitter/)) {
       console.log('Twitter Symbols: no buttons. setup stop.');
       return;
     }
-    var as = buttons.getElementsByTagName('a');
-    // if symbol table has already inserted, exit function.
-    if (as.length > 2) return;
-    var tweet = as[as.length - 1];
+
+    var tweet = buttons.querySelector('a.tweet-button');
     buttons.insertBefore(smile_link, tweet);
     buttons.insertBefore(symbol_table, tweet);
     symbol_table.setAttribute('top', smile_link.top + smile_link.height);
@@ -166,6 +167,7 @@ function create_symbol_tables(status, container) {
       if (i % cols_num == cols_num - 1 || i == symbols.length - 1) 
         symbol_table.appendChild(tr);
     }
+
     //smile marks
     for (var i = 0; i < options.smiles.length; i++) {
       var td = document.createElement('td');
@@ -196,6 +198,7 @@ function create_symbol_tables(status, container) {
       if (i % cols_num_smile == cols_num_smile - 1 || i == options.smiles.length - 1) 
         symbol_table.appendChild(tr);
     }
+
     //options link.
     var text = document.createTextNode();
     text.nodeValue = 'You can add and edit smile marks in options page.';
@@ -216,22 +219,24 @@ function create_symbol_tables(status, container) {
     var body = document.getElementsByTagName('body')[0];
     body.addEventListener('click', function(){var s = document.getElementById(symbols_id); if (s.style.display == "inline") s.style.display = "none";}, false);
   } catch (e) {
-    console.log('Twitter Symbols: ' + e);
+    console.log('Twitter Symbols: create_symbol_tables ' + e);
   }
 }
+
 function register_scripts() {
   var globalScript = "(" + (function(){
     console.log('Twitter Symbols: global script start.');
     create_symbol_tables();
     var body = document.getElementsByTagName('body')[0];
     body.addEventListener('DOMNodeInserted', function(event){
+      if (!event.target.innerHTML) return;
       var divs = event.target.getElementsByTagName('div');
       for (var i = 0; i < divs.length; i++) {
         var d = divs[i];
-        if (d.className.indexOf('tweet-button-container') > -1) {
+        if (d.className.indexOf('tweet-button-sub-container') > -1) {
           var cont = d;
           setTimeout(function(){
-            var textareaNodeList = cont.parentElement.getElementsByTagName('textarea');
+            var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
             if (textareaNodeList.length == 0) return;
             var statusBox = textareaNodeList.item(0);
             create_symbol_tables(statusBox, cont);
