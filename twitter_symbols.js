@@ -23,20 +23,18 @@
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
 
-var options = {};
 //オプション設定項目の取得
 chrome.extension.sendRequest("get_ts_options", function(response) {
-  options = response.options;
-  register_scripts();
+  init(response.options);
 });
 
 var search_status_box, generate_smile_link, setup_smile_link;
 if (location.hostname.match(/twitter/)) {
   //Twitter
-  search_status_box = function search_status_box(statusBox) {
+  search_status_box = function(statusBox) {
     return document.getElementById('status');
   };
-  generate_smile_link = function generate_smile_link() {
+  generate_smile_link = function() {
     var smile_link = document.createElement('a');
     //smile_link.setAttribute('class', 'smily-button tweet-button button');
     smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button button');
@@ -45,7 +43,7 @@ if (location.hostname.match(/twitter/)) {
     smile_link.appendChild(button_caption);
     return smile_link;
   };
-  setup_smile_link = function setup_smile_link(smile_link, symbol_table, callee, buttons) {
+  setup_smile_link = function(smile_link, symbol_table, callee, buttons) {
     var buttons = buttons || document.getElementById('tweeting_controls');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
@@ -61,10 +59,10 @@ if (location.hostname.match(/twitter/)) {
   };
 } else if (location.hostname.match(/twipple/)) {
   //Twipple
-  search_status_box = function search_status_box() {
+  search_status_box = function() {
     return document.getElementById('input');
   };
-  generate_smile_link = function generate_smile_link() {
+  generate_smile_link = function() {
     var smile_link = document.createElement('a');
     smile_link.setAttribute('class', 'twipple-smile-link');
     var span = document.createElement('span');
@@ -75,7 +73,7 @@ if (location.hostname.match(/twitter/)) {
     smile_link.appendChild(span);
     return smile_link;
   };
-  setup_smile_link = function setup_smile_link(smile_link, symbol_table) {
+  setup_smile_link = function(smile_link, symbol_table) {
     var buttons = document.getElementById('postarea_inRight');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
@@ -89,10 +87,10 @@ if (location.hostname.match(/twitter/)) {
   };
 } else if (location.hostname.match(/hootsuite/)) {
   //hootsuite
-  search_status_box = function search_status_box() {
+  search_status_box = function() {
     return document.getElementById('messageBoxMessage');
   };
-  generate_smile_link = function generate_smile_link() {
+  generate_smile_link = function() {
     var smile_link = document.createElement('a');
     smile_link.setAttribute('class', 'hootsuite-smile-link');
     var span = document.createElement('span');
@@ -102,7 +100,7 @@ if (location.hostname.match(/twitter/)) {
     smile_link.appendChild(span);
     return smile_link;
   };
-  setup_smile_link = function setup_smile_link(smile_link, symbol_table, callee) {
+  setup_smile_link = function(smile_link, symbol_table, callee) {
     var buttons = document.getElementById('messageTools');
     if (!buttons) {
       console.log('Twitter Symbols: no buttons. setup stop.');
@@ -133,7 +131,7 @@ if (location.hostname.match(/twitter/)) {
   throw new Exception('unknown url.');
 }
 
-function create_symbol_tables(status, container) {
+function create_symbol_tables(options, status, container) {
   var callee = arguments.callee;
   var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?☕';
   var cols_num = 15;
@@ -217,60 +215,38 @@ function create_symbol_tables(status, container) {
 
     setup_smile_link(smile_link, symbol_table, callee, container);
     var body = document.getElementsByTagName('body')[0];
-    body.addEventListener('click', function(){var s = document.getElementById(symbols_id); if (s.style.display == "inline") s.style.display = "none";}, false);
+    body.addEventListener('click', function(){
+      var s = document.getElementById(symbols_id);
+      if (s && s.style.display == "inline") {
+        s.style.display = "none";
+      }
+    }, false);
   } catch (e) {
     console.log('Twitter Symbols: create_symbol_tables ' + e);
   }
 }
 
-function register_scripts() {
-  var globalScript = "(" + (function(){
-    console.log('Twitter Symbols: global script start.');
-    create_symbol_tables();
-    var body = document.getElementsByTagName('body')[0];
-    body.addEventListener('DOMNodeInserted', function(event){
-      if (!event.target.innerHTML) return;
-      var divs = event.target.getElementsByTagName('div');
-      for (var i = 0; i < divs.length; i++) {
-        var d = divs[i];
-        if (d.className.indexOf('tweet-button-sub-container') > -1) {
-          var cont = d;
-          setTimeout(function(){
-            var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
-            if (textareaNodeList.length == 0) return;
-            var statusBox = textareaNodeList.item(0);
-            create_symbol_tables(statusBox, cont);
-            }, 500);
-        }
+function init(options) {
+  console.log('Twitter Symbols: global script start.');
+  create_symbol_tables(options);
+  var body = document.getElementsByTagName('body')[0];
+  body.addEventListener('DOMNodeInserted', function(event){
+    if (!event.target.innerHTML) return;
+    var divs = event.target.getElementsByTagName('div');
+    for (var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      if (d.className.indexOf('tweet-button-sub-container') > -1) {
+        var cont = d;
+        setTimeout(function(){
+          var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
+          if (textareaNodeList.length == 0) return;
+          var statusBox = textareaNodeList.item(0);
+          create_symbol_tables(options, statusBox, cont);
+        }, 500);
       }
-    });
-    console.log('Twitter Symbols: global script end.');
-  }).toString() + ")();";
-
-  //スクリプトノード追加
-  exportToSite('var options = ' + JSON.stringify(options) + ';', globalScript, search_status_box, generate_smile_link, setup_smile_link, create_symbol_tables);
-  console.log('Twitter Symbols: initialize end.');
-}
-
-//スクリプトのサイトスペースへのエクスポート
-function exportToSite() {
-  var scriptContent = '';
-  for (var i = 0; i < arguments.length; i++) {
-    scriptContent += arguments[i].toString() + '\n';
-  }
-  addScriptNode(scriptContent);
-}
-
-//スクリプトノードの生成
-function addScriptNode(content){
-  var headNode = document.querySelector('head');
-  var scriptNode = document.createElement('script');
-  scriptNode.setAttribute('type','text/javascript');
-  //ちゃんとテキストノード作って追加しないとWindows版のChromeで動かない
-  var textNode = document.createTextNode();
-  textNode.nodeValue = '//<![CDATA[\n' + content + '\n//]]>';
-  scriptNode.appendChild(textNode);
-  headNode.appendChild(scriptNode);
+    }
+  });
+  console.log('Twitter Symbols: global script end.');
 }
 
 /* vim: set ts=2 sw=2 sts=2 expandtab fenc=utf-8: */
