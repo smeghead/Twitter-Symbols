@@ -19,6 +19,7 @@
 //2011-02-18 1.0.18 fixed a bug that smile button does'nt appear.
 //2011-04-28 1.0.19 added coffee cup symbol.
 //2011-07-28 1.0.20 supported with DOM structure changed in official twitter site.
+//2011-08-07 1.0.21 supported new twipple.jp. source code has restructured.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -28,108 +29,173 @@ chrome.extension.sendRequest("get_ts_options", function(response) {
   init(response.options);
 });
 
-var search_status_box, generate_smile_link, setup_smile_link;
-if (location.hostname.match(/twitter/)) {
-  //Twitter
-  search_status_box = function(statusBox) {
-    return document.getElementById('status');
-  };
-  generate_smile_link = function() {
-    var smile_link = document.createElement('a');
-    //smile_link.setAttribute('class', 'smily-button tweet-button button');
-    smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button button');
-    var button_caption = document.createTextNode();
-    button_caption.nodeValue = '☺';
-    smile_link.appendChild(button_caption);
-    return smile_link;
-  };
-  setup_smile_link = function(smile_link, symbol_table, callee, buttons) {
-    var buttons = buttons || document.getElementById('tweeting_controls');
-    if (!buttons) {
-      console.log('Twitter Symbols: no buttons. setup stop.');
-      return;
-    }
-
-    var tweet = buttons.querySelector('a.tweet-button');
-    buttons.insertBefore(smile_link, tweet);
-    buttons.insertBefore(symbol_table, tweet);
-    symbol_table.setAttribute('top', smile_link.top + smile_link.height);
-    symbol_table.setAttribute('left', smile_link.left);
-    symbol_table.style.display = 'none';
-  };
-} else if (location.hostname.match(/twipple/)) {
-  //Twipple
-  search_status_box = function() {
-    return document.getElementById('input');
-  };
-  generate_smile_link = function() {
-    var smile_link = document.createElement('a');
-    smile_link.setAttribute('class', 'twipple-smile-link');
-    var span = document.createElement('span');
-    var button_caption = document.createTextNode();
-    button_caption.nodeValue = '☺';
-    span.appendChild(button_caption);
-    span.setAttribute('style', 'font-size:15pt;');
-    smile_link.appendChild(span);
-    return smile_link;
-  };
-  setup_smile_link = function(smile_link, symbol_table) {
-    var buttons = document.getElementById('postarea_inRight');
-    if (!buttons) {
-      console.log('Twitter Symbols: no buttons. setup stop.');
-      return;
-    }
-    buttons.insertBefore(smile_link, buttons.firstChild);
-    buttons.insertBefore(symbol_table, buttons.firstChild);
-    symbol_table.setAttribute('top', smile_link.top + smile_link.height);
-    symbol_table.setAttribute('left', smile_link.left);
-    symbol_table.style.display = 'none';
-  };
-} else if (location.hostname.match(/hootsuite/)) {
-  //hootsuite
-  search_status_box = function() {
-    return document.getElementById('messageBoxMessage');
-  };
-  generate_smile_link = function() {
-    var smile_link = document.createElement('a');
-    smile_link.setAttribute('class', 'hootsuite-smile-link');
-    var span = document.createElement('span');
-    var button_caption = document.createTextNode();
-    button_caption.nodeValue = '☺';
-    span.appendChild(button_caption);
-    smile_link.appendChild(span);
-    return smile_link;
-  };
-  setup_smile_link = function(smile_link, symbol_table, callee) {
-    var buttons = document.getElementById('messageTools');
-    if (!buttons) {
-      console.log('Twitter Symbols: no buttons. setup stop.');
-      return;
-    }
-    buttons.insertBefore(symbol_table, buttons.firstChild);
-    buttons.insertBefore(smile_link, buttons.firstChild);
-    symbol_table.setAttribute('top', smile_link.top + smile_link.height);
-    symbol_table.setAttribute('left', smile_link.left);
-    symbol_table.style.display = 'none';
-    // check symbol table. if deleted symbol table, recreate.
-    if (document.twitter_symbols___timer == undefined) {
-      document.twitter_symbols___timer = setInterval(function(){
-        var links = document.getElementsByTagName('a');
-        var exists = false;
-        for (var i = 0; i < links.length; i++) {
-          if (links[i].className.indexOf('hootsuite-smile-link') > -1) {
-            exists = true;
+function twitter_site() {
+  return { 
+    init: function(options) {
+      document.body.addEventListener('DOMNodeInserted', function(event){
+        if (!event.target.innerHTML) return;
+        var divs = event.target.getElementsByTagName('div');
+        for (var i = 0; i < divs.length; i++) {
+          var d = divs[i];
+          if (d.className.indexOf('tweet-button-sub-container') > -1) {
+            var cont = d;
+            setTimeout(function(){
+              var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
+              if (textareaNodeList.length == 0) return;
+              var status_box = textareaNodeList.item(0);
+              create_symbol_tables(options, status_box, cont);
+            }, 500);
           }
         }
-        if (!exists) {
-          callee();
-        }
-      }, 5000);
+      });
+    },
+    search_status_box: function(status_box) {
+      return document.getElementById('status');
+    },
+    generate_smile_link: function() {
+      var smile_link = document.createElement('a');
+      //smile_link.setAttribute('class', 'smily-button tweet-button button');
+      smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button button');
+      var button_caption = document.createTextNode();
+      button_caption.nodeValue = '☺';
+      smile_link.appendChild(button_caption);
+      return smile_link;
+    },
+    setup_smile_link: function(smile_link, symbol_table, callee, buttons) {
+      var buttons = buttons || document.getElementById('tweeting_controls');
+      if (!buttons) {
+        console.log('Twitter Symbols: no buttons. setup stop.');
+        return;
+      }
+
+      var tweet = buttons.querySelector('a.tweet-button');
+      buttons.insertBefore(smile_link, tweet);
+      document.body.appendChild(symbol_table);
+      symbol_table.style.display = 'none';
+    },
+    open_symbol_table: function(symbol_table, link) {
+      console.log('id:' + symbol_table.id);
+      console.log(symbol_table.style.display);
+      var pos = getElementPosition(link);
+      symbol_table.style.top = pos.top + 28 + 'px';
+      symbol_table.style.left = pos.left + 'px';
+      symbol_table.style.display = 'block';
+      console.log(symbol_table.style.display);
     }
   };
-} else {
-  throw new Exception('unknown url.');
 }
+
+function twipple_site() {
+  return {
+    init: function(options) {
+      var cont = document.getElementById('ExecutionButtonControl');
+      create_symbol_tables(options, document.getElementById('input'), cont.querySelector('div'));
+      var cont2 = document.getElementById('DefaultControl');
+      create_symbol_tables(options, document.getElementById('input2'), cont2.querySelector('span'));
+    },
+    search_status_box: function() {
+      return document.getElementById('input');
+    },
+    generate_smile_link: function() {
+      var smile_link = document.createElement('a');
+      smile_link.setAttribute('class', 'twipple-smile-link');
+      smile_link.setAttribute('href', 'javascript:void(0);');
+      var span = document.createElement('span');
+      var button_caption = document.createTextNode();
+      button_caption.nodeValue = '☺';
+      span.appendChild(button_caption);
+      span.setAttribute('style', 'font-size:15pt;');
+      smile_link.appendChild(span);
+      return smile_link;
+    },
+    setup_smile_link: function(smile_link, symbol_table, callee, container) {
+      var li = document.createElement('li');
+      if (container.tagName == 'DIV') {
+        li.setAttribute('class', 'tweetAreaButtonSwitch');
+      } else {
+        li.setAttribute('class', 'tweetAreaButtonSwitch fl');
+      }
+      var ul = container.querySelector('ul');
+      li.insertBefore(smile_link, li.firstChild);
+      ul.insertBefore(li, ul.firstChild);
+      document.body.appendChild(symbol_table);
+    },
+    open_symbol_table: function(symbol_table, link) {
+      var pos = getElementPosition(link);
+      symbol_table.style.top = pos.top + 20 + 'px';
+      symbol_table.style.left = pos.left + 'px';
+      symbol_table.style.display = 'block';
+      console.log('show');
+    }
+  };
+}
+
+function hootsuite_site() {
+  return {
+    init: function(options) {
+      create_symbol_tables(options);
+    },
+    search_status_box: function() {
+      return document.getElementById('messageBoxMessage');
+    },
+    generate_smile_link: function() {
+      var smile_link = document.createElement('a');
+      smile_link.setAttribute('class', 'hootsuite-smile-link');
+      var span = document.createElement('span');
+      var button_caption = document.createTextNode();
+      button_caption.nodeValue = '☺';
+      span.appendChild(button_caption);
+      smile_link.appendChild(span);
+      return smile_link;
+    },
+    setup_smile_link: function(smile_link, symbol_table, callee) {
+      var buttons = document.getElementById('messageTools');
+      if (!buttons) {
+        console.log('Twitter Symbols: no buttons. setup stop.');
+        return;
+      }
+      buttons.insertBefore(symbol_table, buttons.firstChild);
+      buttons.insertBefore(smile_link, buttons.firstChild);
+      symbol_table.setAttribute('top', smile_link.top + smile_link.height + 'px');
+      symbol_table.setAttribute('left', smile_link.left + 'px');
+      // check symbol table. if deleted symbol table, recreate.
+      if (document.twitter_symbols___timer == undefined) {
+        document.twitter_symbols___timer = setInterval(function(){
+          var links = document.getElementsByTagName('a');
+          var exists = false;
+          for (var i = 0; i < links.length; i++) {
+            if (links[i].className.indexOf('hootsuite-smile-link') > -1) {
+              exists = true;
+            }
+          }
+          if (!exists) {
+            callee();
+          }
+        }, 5000);
+      }
+    },
+    open_symbol_table: function(symbol_table, link) {
+      symbol_table.style.display = 'block';
+    }
+  };
+}
+
+var current_site = function(hostname){
+  if (hostname.match(/twitter/)) {
+    //Twitter
+    return twitter_site();
+  } else if (hostname.match(/twipple/)) {
+    //Twipple
+    console.log('Twitter Symbols: tiwpple');
+    return twipple_site();
+  } else if (hostname.match(/hootsuite/)) {
+    //hootsuite
+    return hootsuite_site();
+  } else {
+    throw new Exception('unknown url.');
+  }
+}(location.hostname);
+
 
 function create_symbol_tables(options, status, container) {
   var callee = arguments.callee;
@@ -150,16 +216,15 @@ function create_symbol_tables(options, status, container) {
       text.nodeValue = symbols[i];
       td.appendChild(text);
       td.addEventListener('click', function(){
-          var statusBox = status || search_status_box();
-          if (!statusBox) {
+          var status_box = status || current_site.search_status_box();
+          if (!status_box) {
             console.log('Twitter Symbols: no status box. setup stop.');
             return;
           }
-          var pos = statusBox.selectionStart;
-          statusBox.value = statusBox.value.substring(0, pos) + this.innerText + statusBox.value.substring(pos);
-          statusBox.selectionStart = pos + this.innerText.length;
-          var s = document.getElementById(symbols_id);
-          s.style.display = s.style.display != "inline" ? "inline" : "none";
+          var pos = status_box.selectionStart;
+          status_box.value = status_box.value.substring(0, pos) + this.innerText + status_box.value.substring(pos);
+          status_box.selectionStart = pos + this.innerText.length;
+          symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
       }, false);
       tr.appendChild(td);
       if (i % cols_num == cols_num - 1 || i == symbols.length - 1) 
@@ -177,20 +242,19 @@ function create_symbol_tables(options, status, container) {
       text.nodeValue = options.smiles[i];
       td.appendChild(text);
       td.addEventListener('click', function(){
-          var statusBox = status || search_status_box(statusBox);
-          if (!statusBox) {
+          var status_box = status || current_site.search_status_box(status_box);
+          if (!status_box) {
             console.log('Twitter Symbols: no status box. setup stop.');
             return;
           }
-          var pos = statusBox.selectionStart;
+          var pos = status_box.selectionStart;
           var facemark = this.innerText;
           if (facemark.match(/^".*"$/)) {
             facemark = facemark.substring(1, facemark.length -1);
           }
-          statusBox.value = statusBox.value.substring(0, pos) + facemark + statusBox.value.substring(pos);
-          statusBox.selectionStart = pos + facemark.length;
-          var s = document.getElementById(symbols_id);
-          s.style.display = s.style.display != "inline" ? "inline" : "none";
+          status_box.value = status_box.value.substring(0, pos) + facemark + status_box.value.substring(pos);
+          status_box.selectionStart = pos + facemark.length;
+          symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
       }, false);
       tr.appendChild(td);
       if (i % cols_num_smile == cols_num_smile - 1 || i == options.smiles.length - 1) 
@@ -208,17 +272,17 @@ function create_symbol_tables(options, status, container) {
     tr.appendChild(td);
     symbol_table.appendChild(tr);
 
-    var smile_link = generate_smile_link();
-    smile_link.setAttribute(
-        smile_link.tagName.toLowerCase() == 'a' ? 'href' : 'onClick',
-        'javascript:var s = document.getElementById("' + symbols_id + '"); s.style.display = s.style.display == "none" ? "inline" : "none";');
+    var smile_link = current_site.generate_smile_link();
+    smile_link.addEventListener('click', function() {
+      setTimeout(function(){
+        current_site.open_symbol_table(symbol_table, smile_link);
+      }, 1);
+    }, false);
 
-    setup_smile_link(smile_link, symbol_table, callee, container);
-    var body = document.getElementsByTagName('body')[0];
-    body.addEventListener('click', function(){
-      var s = document.getElementById(symbols_id);
-      if (s && s.style.display == "inline") {
-        s.style.display = "none";
+    current_site.setup_smile_link(smile_link, symbol_table, callee, container);
+    document.body.addEventListener('click', function(){
+      if (symbol_table && symbol_table.style.display == "block") {
+        symbol_table.style.display = "none";
       }
     }, false);
   } catch (e) {
@@ -228,25 +292,20 @@ function create_symbol_tables(options, status, container) {
 
 function init(options) {
   console.log('Twitter Symbols: global script start.');
-  create_symbol_tables(options);
-  var body = document.getElementsByTagName('body')[0];
-  body.addEventListener('DOMNodeInserted', function(event){
-    if (!event.target.innerHTML) return;
-    var divs = event.target.getElementsByTagName('div');
-    for (var i = 0; i < divs.length; i++) {
-      var d = divs[i];
-      if (d.className.indexOf('tweet-button-sub-container') > -1) {
-        var cont = d;
-        setTimeout(function(){
-          var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
-          if (textareaNodeList.length == 0) return;
-          var statusBox = textareaNodeList.item(0);
-          create_symbol_tables(options, statusBox, cont);
-        }, 500);
-      }
-    }
-  });
+  current_site.init(options);
   console.log('Twitter Symbols: global script end.');
 }
+function getElementPosition(element) {
+  var valueT = 0, valueL = 0;
+  do {
+    valueT += element.offsetTop  || 0;
+    valueL += element.offsetLeft || 0;
+    if (element.offsetParent == document.body)
+      if (element.position == 'absolute') break;
 
+    element = element.offsetParent;
+  } while (element);
+
+  return {left: valueL, top: valueT};
+}
 /* vim: set ts=2 sw=2 sts=2 expandtab fenc=utf-8: */

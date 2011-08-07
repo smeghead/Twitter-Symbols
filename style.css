@@ -1,6 +1,6 @@
 table.symbols {
   position: absolute;
-  z-index: 100;
+  z-index: 1000;
   display: none;
 }
 table.symbols,
