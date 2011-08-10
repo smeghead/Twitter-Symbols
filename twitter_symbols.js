@@ -20,6 +20,7 @@
 //2011-04-28 1.0.19 added coffee cup symbol.
 //2011-07-28 1.0.20 supported with DOM structure changed in official twitter site.
 //2011-08-07 1.0.21 supported new twipple.jp. source code has restructured.
+//2011-08-10 1.0.22 fixed a bag not display smile link in hootsuit.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -61,7 +62,7 @@ function twitter_site() {
       smile_link.appendChild(button_caption);
       return smile_link;
     },
-    setup_smile_link: function(smile_link, symbol_table, callee, buttons) {
+    setup_smile_link: function(smile_link, symbol_table, args, buttons) {
       var buttons = buttons || document.getElementById('tweeting_controls');
       if (!buttons) {
         console.log('Twitter Symbols: no buttons. setup stop.');
@@ -74,13 +75,10 @@ function twitter_site() {
       symbol_table.style.display = 'none';
     },
     open_symbol_table: function(symbol_table, link) {
-      console.log('id:' + symbol_table.id);
-      console.log(symbol_table.style.display);
       var pos = getElementPosition(link);
       symbol_table.style.top = pos.top + 28 + 'px';
       symbol_table.style.left = pos.left + 'px';
       symbol_table.style.display = 'block';
-      console.log(symbol_table.style.display);
     }
   };
 }
@@ -108,7 +106,7 @@ function twipple_site() {
       smile_link.appendChild(span);
       return smile_link;
     },
-    setup_smile_link: function(smile_link, symbol_table, callee, container) {
+    setup_smile_link: function(smile_link, symbol_table, args, container) {
       var li = document.createElement('li');
       if (container.tagName == 'DIV') {
         li.setAttribute('class', 'tweetAreaButtonSwitch');
@@ -125,7 +123,6 @@ function twipple_site() {
       symbol_table.style.top = pos.top + 20 + 'px';
       symbol_table.style.left = pos.left + 'px';
       symbol_table.style.display = 'block';
-      console.log('show');
     }
   };
 }
@@ -148,7 +145,7 @@ function hootsuite_site() {
       smile_link.appendChild(span);
       return smile_link;
     },
-    setup_smile_link: function(smile_link, symbol_table, callee) {
+    setup_smile_link: function(smile_link, symbol_table, args) {
       var buttons = document.getElementById('messageTools');
       if (!buttons) {
         console.log('Twitter Symbols: no buttons. setup stop.');
@@ -161,15 +158,9 @@ function hootsuite_site() {
       // check symbol table. if deleted symbol table, recreate.
       if (document.twitter_symbols___timer == undefined) {
         document.twitter_symbols___timer = setInterval(function(){
-          var links = document.getElementsByTagName('a');
-          var exists = false;
-          for (var i = 0; i < links.length; i++) {
-            if (links[i].className.indexOf('hootsuite-smile-link') > -1) {
-              exists = true;
-            }
-          }
-          if (!exists) {
-            callee();
+          var link = document.querySelector('a.hootsuite-smile-link');
+          if (!link) {
+            args.callee.apply(null, args);
           }
         }, 5000);
       }
@@ -198,7 +189,7 @@ var current_site = function(hostname){
 
 
 function create_symbol_tables(options, status, container) {
-  var callee = arguments.callee;
+  var args = arguments;
   var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?☕';
   var cols_num = 15;
   var cols_num_smile = 3;
@@ -279,7 +270,7 @@ function create_symbol_tables(options, status, container) {
       }, 1);
     }, false);
 
-    current_site.setup_smile_link(smile_link, symbol_table, callee, container);
+    current_site.setup_smile_link(smile_link, symbol_table, args, container);
     document.body.addEventListener('click', function(){
       if (symbol_table && symbol_table.style.display == "block") {
         symbol_table.style.display = "none";
@@ -295,6 +286,7 @@ function init(options) {
   current_site.init(options);
   console.log('Twitter Symbols: global script end.');
 }
+
 function getElementPosition(element) {
   var valueT = 0, valueL = 0;
   do {
