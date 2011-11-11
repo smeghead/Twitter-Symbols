@@ -1,6 +1,6 @@
 table.symbols {
   position: absolute;
-  z-index: 1000;
+  z-index: 10000;
   display: none;
 }
 table.symbols,
@@ -50,8 +50,10 @@ a.twipple-smile-link:hover {
 a.hootsuite-smile-link {
 }
 a.hootsuite-smile-link span {
-  color: #333;
-  font-size: 25px !important;
+/*   color: #333; */
+  font-size: 15pt !important;
+  padding: 0px;
+  margin: 0px;
 }
 a.hootsuite-smile-link:hover {
   text-decoration: none;

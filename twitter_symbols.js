@@ -21,6 +21,10 @@
 //2011-07-28 1.0.20 supported with DOM structure changed in official twitter site.
 //2011-08-07 1.0.21 supported new twipple.jp. source code has restructured.
 //2011-08-10 1.0.22 fixed a bag not display smile link in hootsuit.
+//2011-08-31 1.0.23 supported new hootsuite.
+//2011-09-11 1.0.24 fixed position display symbol table when scrolled in twitter.
+//2011-10-14 1.0.25 fixed to added multiple smily butons like goast.
+//2011-11-11 1.0.26 when reply and DM, symbol table not appear front of screen. fixed this.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -66,6 +70,10 @@ function twitter_site() {
       var buttons = buttons || document.getElementById('tweeting_controls');
       if (!buttons) {
         console.log('Twitter Symbols: no buttons. setup stop.');
+        return;
+      }
+      if (buttons.querySelector('a.smily-button')) {
+        console.log('Twitter Symbols: already exists. setup stop.');
         return;
       }
 
@@ -133,7 +141,7 @@ function hootsuite_site() {
       create_symbol_tables(options);
     },
     search_status_box: function() {
-      return document.getElementById('messageBoxMessage');
+      return document.querySelector('textarea.messageBoxMessage');
     },
     generate_smile_link: function() {
       var smile_link = document.createElement('a');
@@ -146,7 +154,7 @@ function hootsuite_site() {
       return smile_link;
     },
     setup_smile_link: function(smile_link, symbol_table, args) {
-      var buttons = document.getElementById('messageTools');
+      var buttons = document.querySelector('div#messageTools div.controls');
       if (!buttons) {
         console.log('Twitter Symbols: no buttons. setup stop.');
         return;
@@ -297,6 +305,10 @@ function getElementPosition(element) {
 
     element = element.offsetParent;
   } while (element);
+
+  // if it has scrolled.
+  valueT += document.documentElement.scrollTop || document.body.scrollTop || 0;
+  valueL += document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 
   return {left: valueL, top: valueT};
 }
