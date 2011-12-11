@@ -25,6 +25,7 @@
 //2011-09-11 1.0.24 fixed position display symbol table when scrolled in twitter.
 //2011-10-14 1.0.25 fixed to added multiple smily butons like goast.
 //2011-11-11 1.0.26 when reply and DM, symbol table not appear front of screen. fixed this.
+//2011-12-11 1.0.27 when selected at reply and DM window, window disapeared. fixed this. > thank you, @PP_Thoneo 
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -214,16 +215,18 @@ function create_symbol_tables(options, status, container) {
       var text = document.createTextNode();
       text.nodeValue = symbols[i];
       td.appendChild(text);
-      td.addEventListener('click', function(){
-          var status_box = status || current_site.search_status_box();
-          if (!status_box) {
-            console.log('Twitter Symbols: no status box. setup stop.');
-            return;
-          }
-          var pos = status_box.selectionStart;
-          status_box.value = status_box.value.substring(0, pos) + this.innerText + status_box.value.substring(pos);
-          status_box.selectionStart = pos + this.innerText.length;
-          symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
+      td.addEventListener('click', function(e){
+        e.stopPropagation();
+        var status_box = status || current_site.search_status_box();
+        if (!status_box) {
+          console.log('Twitter Symbols: no status box. setup stop.');
+          return;
+        }
+        var pos = status_box.selectionStart;
+        status_box.value = status_box.value.substring(0, pos) + this.innerText + status_box.value.substring(pos);
+        status_box.selectionStart = pos + this.innerText.length;
+        symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
+        return false;
       }, false);
       tr.appendChild(td);
       if (i % cols_num == cols_num - 1 || i == symbols.length - 1) 
@@ -241,19 +244,19 @@ function create_symbol_tables(options, status, container) {
       text.nodeValue = options.smiles[i];
       td.appendChild(text);
       td.addEventListener('click', function(){
-          var status_box = status || current_site.search_status_box(status_box);
-          if (!status_box) {
-            console.log('Twitter Symbols: no status box. setup stop.');
-            return;
-          }
-          var pos = status_box.selectionStart;
-          var facemark = this.innerText;
-          if (facemark.match(/^".*"$/)) {
-            facemark = facemark.substring(1, facemark.length -1);
-          }
-          status_box.value = status_box.value.substring(0, pos) + facemark + status_box.value.substring(pos);
-          status_box.selectionStart = pos + facemark.length;
-          symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
+        var status_box = status || current_site.search_status_box(status_box);
+        if (!status_box) {
+          console.log('Twitter Symbols: no status box. setup stop.');
+          return;
+        }
+        var pos = status_box.selectionStart;
+        var facemark = this.innerText;
+        if (facemark.match(/^".*"$/)) {
+          facemark = facemark.substring(1, facemark.length -1);
+        }
+        status_box.value = status_box.value.substring(0, pos) + facemark + status_box.value.substring(pos);
+        status_box.selectionStart = pos + facemark.length;
+        symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
       }, false);
       tr.appendChild(td);
       if (i % cols_num_smile == cols_num_smile - 1 || i == options.smiles.length - 1) 

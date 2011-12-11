@@ -5,15 +5,14 @@ table.symbols {
 }
 table.symbols,
 table.symbols td {
-  margin: 1px !important;
-  padding: 1px !important;
-  border-collapse: collapse !important;
   border: 1px solid gray !important;
-  color: #333;
+  border-collapse: collapse !important;
+  color: #555;
   background-color: white;
   font-size: 14pt;
 }
 table.symbols td {
+  padding: 1px !important;
   width: 20px;
   text-align: center;
 }
@@ -26,7 +25,7 @@ table.symbols td.description {
   cursor: default;
 }
 table.symbols td:hover.description {
-  color: #333;
+  color: #555;
   background-color: white;
   cursor: default;
 }
