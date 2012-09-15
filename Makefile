@@ -1,4 +1,4 @@
-FILES = README.md background.html icon.png manifest.json options.html options.js style.css twitter_symbols.js
+FILES = README.md background.js icon.png manifest.json options.html options.js style.css twitter_symbols.js
 
 .PHONY: dist
 default:

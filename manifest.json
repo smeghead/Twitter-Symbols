@@ -1,8 +1,12 @@
 {
   "name": "Twitter Symbols",
-  "version": "1.0.27",
+  "version": "2.0.0",
   "description": "At Twitter official web site(or hootsuite, twipple), support to insert symbols.",
   "icons": { "48": "icon.png" },
+  "manifest_version": 2,
+  "permissions": [
+    "background"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -23,7 +27,9 @@
       "css": ["style.css"]
     }
   ],
-  "background_page": "background.html",
+  "background": {
+    "scripts": ["background.js"]
+  },
   "options_page": "options.html"
 }
 

@@ -1,39 +1,10 @@
 <html>
   <head>
     <title>Twitter Symbols Options</title>
+    <script type="text/javascript" src="background.js"></script>
     <script type="text/javascript" src="options.js"></script>
-    <script type="text/javascript">
-
-function store_options() {
-//  console.log('save smiles:' + document.getElementById('smiles').value);
-  console.log('save smiles:' + document.getElementById('smiles').value.split("\n"));
-  var smiles = document.getElementById('smiles').value.split("\n");
-  save_ts_options({
-//    css: document.getElementById('css').value,
-    smiles: smiles
-  });
-
-  // Update status to let user know options were saved.
-  var status = document.getElementById("status");
-  status.innerHTML = "Options Saved.";
-  setTimeout(function() {
-    status.innerHTML = "";
-  }, 2000);
-}
-
-function restore_options() {
-  var options = get_ts_options();
-//  document.getElementById('css').value = options.css;
-  console.log(options.smiles);
-  document.getElementById('smiles').value = options.smiles.join("\n");
-}
-function clear_options() {
-  clear_ts_options();
-  restore_options();
-}
-    </script>
   </head>
-  <body onload="restore_options()">
+  <body>
 
     <h1>Twitter Symbols Settings</h1>
     <div id="status" style="color: blue; font-weight: bold;">
@@ -45,8 +16,8 @@ function clear_options() {
     <div>smile marks:</div>
     <textarea id="smiles" rows="3" cols="100" style="width: 300px; height: 300px;"></textarea>
     <br>
-    <button onclick="store_options()">Save</button>
-    <button onclick="clear_options()">Clear(Back to default)</button>
-    <button onclick="window.close()">Close</button>
+    <button id="save">Save</button>
+    <button id="clear">Clear(Back to default)</button>
+    <button id="close">Close</button>
   </body>
 </html>

@@ -26,6 +26,8 @@
 //2011-10-14 1.0.25 fixed to added multiple smily butons like goast.
 //2011-11-11 1.0.26 when reply and DM, symbol table not appear front of screen. fixed this.
 //2011-12-11 1.0.27 when selected at reply and DM window, window disapeared. fixed this. > thank you, @PP_Thoneo 
+//2012-01-06 1.0.28 added http://goo.gl/GNgEe to smilemarks.
+//2012-02-14 1.0.29 supported new twitter site design.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -41,19 +43,33 @@ function twitter_site() {
       document.body.addEventListener('DOMNodeInserted', function(event){
         if (!event.target.innerHTML) return;
         var divs = event.target.getElementsByTagName('div');
+        console.log(divs);
         for (var i = 0; i < divs.length; i++) {
-          var d = divs[i];
-          if (d.className.indexOf('tweet-button-sub-container') > -1) {
-            var cont = d;
-            setTimeout(function(){
+          var cont = divs[i];
+          if (cont.className.indexOf('tweet-button') > -1) {
+            console.log(cont);
+            //setTimeout(function(){
               var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
               if (textareaNodeList.length == 0) return;
               var status_box = textareaNodeList.item(0);
               create_symbol_tables(options, status_box, cont);
-            }, 500);
+            //}, 500);
           }
         }
       });
+      {
+        var divs = document.body.querySelectorAll('div.tweet-button');
+        console.log(divs);
+        for (var i = 0; i < divs.length; i++) {
+          var cont = divs[i];
+          console.log(cont);
+          var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
+          if (textareaNodeList.length == 0) return;
+          var status_box = textareaNodeList.item(0);
+          console.log(status_box, cont);
+          create_symbol_tables(options, status_box, cont);
+        }
+      }
     },
     search_status_box: function(status_box) {
       return document.getElementById('status');
@@ -61,7 +77,7 @@ function twitter_site() {
     generate_smile_link: function() {
       var smile_link = document.createElement('a');
       //smile_link.setAttribute('class', 'smily-button tweet-button button');
-      smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button button');
+      smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button btn');
       var button_caption = document.createTextNode();
       button_caption.nodeValue = '☺';
       smile_link.appendChild(button_caption);
@@ -74,11 +90,13 @@ function twitter_site() {
         return;
       }
       if (buttons.querySelector('a.smily-button')) {
-        console.log('Twitter Symbols: already exists. setup stop.');
-        return;
+        console.log('Twitter Symbols: already exists. remove and continue.');
+        var old = buttons.querySelector('a.smily-button');
+        old.parentElement.removeChild(old);
       }
 
-      var tweet = buttons.querySelector('a.tweet-button');
+      smile_link.style.float = 'none';
+      var tweet = buttons.querySelector('button.tweet-action');
       buttons.insertBefore(smile_link, tweet);
       document.body.appendChild(symbol_table);
       symbol_table.style.display = 'none';
@@ -310,8 +328,8 @@ function getElementPosition(element) {
   } while (element);
 
   // if it has scrolled.
-  valueT += document.documentElement.scrollTop || document.body.scrollTop || 0;
-  valueL += document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+//   valueT += document.documentElement.scrollTop || document.body.scrollTop || 0;
+//   valueL += document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 
   return {left: valueL, top: valueT};
 }
