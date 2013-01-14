@@ -28,6 +28,11 @@
 //2011-12-11 1.0.27 when selected at reply and DM window, window disapeared. fixed this. > thank you, @PP_Thoneo 
 //2012-01-06 1.0.28 added http://goo.gl/GNgEe to smilemarks.
 //2012-02-14 1.0.29 supported new twitter site design.
+//2012-09-15 2.0.0 supported new twitter site design.
+//2012-09-15 2.0.1 fixed symbol talbe position.
+//2012-09-23 2.0.2 added symbols
+//2012-11-09 2.1.0 added smile button at profile bio.
+//2013-01-14 2.1.1 fixed a bug fail to insert symbols to empty statusbox.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -43,31 +48,31 @@ function twitter_site() {
       document.body.addEventListener('DOMNodeInserted', function(event){
         if (!event.target.innerHTML) return;
         var divs = event.target.getElementsByTagName('div');
-        console.log(divs);
         for (var i = 0; i < divs.length; i++) {
           var cont = divs[i];
           if (cont.className.indexOf('tweet-button') > -1) {
-            console.log(cont);
             //setTimeout(function(){
               var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
               if (textareaNodeList.length == 0) return;
               var status_box = textareaNodeList.item(0);
-              create_symbol_tables(options, status_box, cont);
+              create_symbol_tables(options, status_box, cont, true);
             //}, 500);
           }
         }
       });
       {
         var divs = document.body.querySelectorAll('div.tweet-button');
-        console.log(divs);
         for (var i = 0; i < divs.length; i++) {
           var cont = divs[i];
-          console.log(cont);
           var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
           if (textareaNodeList.length == 0) return;
           var status_box = textareaNodeList.item(0);
-          console.log(status_box, cont);
           create_symbol_tables(options, status_box, cont);
+        }
+        var bio = document.body.querySelector('#user_description');
+        if (bio) {
+          var bio_label = bio.parentElement.querySelector('.bio-label');
+          create_symbol_tables(options, bio, bio_label, true);
         }
       }
     },
@@ -97,12 +102,23 @@ function twitter_site() {
 
       smile_link.style.float = 'none';
       var tweet = buttons.querySelector('button.tweet-action');
-      buttons.insertBefore(smile_link, tweet);
+      if (tweet) {
+        buttons.insertBefore(smile_link, tweet);
+      } else {
+        buttons.appendChild(smile_link);
+      }
       document.body.appendChild(symbol_table);
       symbol_table.style.display = 'none';
     },
-    open_symbol_table: function(symbol_table, link) {
-      var pos = getElementPosition(link);
+    open_symbol_table: function(symbol_table, link, status_box) {
+      var tweet_button = link.parentElement.querySelector('.tweet-action');
+      status_box.removeAttribute('data-mark_position');
+      if (tweet_button.className.match('disabled')) {
+        var mark_position = status_box.value.length;
+        status_box.value += '_';
+        status_box.setAttribute('data-mark_position', mark_position);
+      }
+      var pos = getElementPosition(link, symbol_table.getAttribute('data-scroll_ignore'));
       symbol_table.style.top = pos.top + 28 + 'px';
       symbol_table.style.left = pos.left + 'px';
       symbol_table.style.display = 'block';
@@ -145,7 +161,7 @@ function twipple_site() {
       ul.insertBefore(li, ul.firstChild);
       document.body.appendChild(symbol_table);
     },
-    open_symbol_table: function(symbol_table, link) {
+    open_symbol_table: function(symbol_table, link, status_box) {
       var pos = getElementPosition(link);
       symbol_table.style.top = pos.top + 20 + 'px';
       symbol_table.style.left = pos.left + 'px';
@@ -192,7 +208,7 @@ function hootsuite_site() {
         }, 5000);
       }
     },
-    open_symbol_table: function(symbol_table, link) {
+    open_symbol_table: function(symbol_table, link, status_box) {
       symbol_table.style.display = 'block';
     }
   };
@@ -214,15 +230,15 @@ var current_site = function(hostname){
   }
 }(location.hostname);
 
-
-function create_symbol_tables(options, status, container) {
+function create_symbol_tables(options, status, container, scroll_ignore) {
   var args = arguments;
-  var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?☕';
+  var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?☕⍢⍤⍥⍨';
   var cols_num = 15;
   var cols_num_smile = 3;
   var symbols_id = 'symbol_table' + new Date().getTime();
   try {
     var symbol_table = document.createElement('table');
+    symbol_table.setAttribute('data-scroll_ignore', scroll_ignore ? 'true' : 'false');
     symbol_table.setAttribute('id', symbols_id);
     symbol_table.setAttribute('class', 'symbols');
     var tr = document.createElement('tr');
@@ -239,6 +255,13 @@ function create_symbol_tables(options, status, container) {
         if (!status_box) {
           console.log('Twitter Symbols: no status box. setup stop.');
           return;
+        }
+        var mark_position = status_box.getAttribute('data-mark_position');
+        if (mark_position) {
+          if (status_box.value.substring(mark_position, mark_position + 1) == '_') {
+            status_box.value = status_box.value.substring(0, mark_position) + status_box.value.substring(mark_position + mark_position + 1);
+          }
+          status_box.removeAttribute('data-mark_position');
         }
         var pos = status_box.selectionStart;
         status_box.value = status_box.value.substring(0, pos) + this.innerText + status_box.value.substring(pos);
@@ -295,7 +318,8 @@ function create_symbol_tables(options, status, container) {
     var smile_link = current_site.generate_smile_link();
     smile_link.addEventListener('click', function() {
       setTimeout(function(){
-        current_site.open_symbol_table(symbol_table, smile_link);
+        var status_box = status || current_site.search_status_box(status_box);
+        current_site.open_symbol_table(symbol_table, smile_link, status_box);
       }, 1);
     }, false);
 
@@ -316,7 +340,7 @@ function init(options) {
   console.log('Twitter Symbols: global script end.');
 }
 
-function getElementPosition(element) {
+function getElementPosition(element, scroll_ignore) {
   var valueT = 0, valueL = 0;
   do {
     valueT += element.offsetTop  || 0;
@@ -327,9 +351,12 @@ function getElementPosition(element) {
     element = element.offsetParent;
   } while (element);
 
+
   // if it has scrolled.
-//   valueT += document.documentElement.scrollTop || document.body.scrollTop || 0;
-//   valueL += document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+  if (scroll_ignore != 'true') {
+    valueT += document.documentElement.scrollTop || document.body.scrollTop || 0;
+    valueL += document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+  }
 
   return {left: valueL, top: valueT};
 }
