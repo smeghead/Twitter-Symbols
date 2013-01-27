@@ -1,6 +1,6 @@
 {
   "name": "Twitter Symbols",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "At Twitter official web site(or hootsuite, twipple), support to insert symbols.",
   "icons": { "48": "icon.png" },
   "manifest_version": 2,
@@ -14,13 +14,7 @@
         "http://twitter.com/*",
         "https://twitter.com/",
         "https://twitter.com/*",
-        "https://twitter.com/",
-        "http://twipple.jp/",
-        "http://twipple.jp/*",
-        "https://twipple.jp/",
-        "https://twipple.jp/*",
-        "http://hootsuite.com/dashboard",
-        "https://hootsuite.com/dashboard"
+        "https://twitter.com/"
       ],
       "js": ["twitter_symbols.js"],
       "run_at": "document_end",

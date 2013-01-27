@@ -33,6 +33,7 @@
 //2012-09-23 2.0.2 added symbols
 //2012-11-09 2.1.0 added smile button at profile bio.
 //2013-01-14 2.1.1 fixed a bug fail to insert symbols to empty statusbox.
+//2013-01-27 2.2.0 supported new twitter site design. terminated twipple and hootsuite support.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -52,9 +53,9 @@ function twitter_site() {
           var cont = divs[i];
           if (cont.className.indexOf('tweet-button') > -1) {
             //setTimeout(function(){
-              var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
-              if (textareaNodeList.length == 0) return;
-              var status_box = textareaNodeList.item(0);
+              var status_box = cont.parentElement.parentElement.parentElement.querySelector('.tweet-box');
+              if (!status_box) return;
+
               create_symbol_tables(options, status_box, cont, true);
             //}, 500);
           }
@@ -64,9 +65,7 @@ function twitter_site() {
         var divs = document.body.querySelectorAll('div.tweet-button');
         for (var i = 0; i < divs.length; i++) {
           var cont = divs[i];
-          var textareaNodeList = cont.parentElement.parentElement.getElementsByTagName('textarea');
-          if (textareaNodeList.length == 0) return;
-          var status_box = textareaNodeList.item(0);
+          var status_box = cont.parentElement.parentElement.parentElement.querySelector('.tweet-box');
           create_symbol_tables(options, status_box, cont);
         }
         var bio = document.body.querySelector('#user_description');
@@ -112,11 +111,21 @@ function twitter_site() {
     },
     open_symbol_table: function(symbol_table, link, status_box) {
       var tweet_button = link.parentElement.querySelector('.tweet-action');
-      status_box.removeAttribute('data-mark_position');
+      status_box.removeAttribute('data-mark-node-index');
       if (tweet_button.className.match('disabled')) {
-        var mark_position = status_box.value.length;
-        status_box.value += '_';
-        status_box.setAttribute('data-mark_position', mark_position);
+        status_box.focus();
+        var selection = window.getSelection();
+        var range = window.getSelection().getRangeAt(0);
+
+        range.insertNode(document.createTextNode('_'));
+        for (var i = 0; i < status_box.firstChild.childNodes.length; i++) {
+          var n = status_box.firstChild.childNodes[i];
+          console.log('mark', n);
+          if (n.nodeValue == '_') {
+            console.log('mark index', i);
+            status_box.setAttribute('data-mark-node-index', i);
+          }
+        }
       }
       var pos = getElementPosition(link, symbol_table.getAttribute('data-scroll_ignore'));
       symbol_table.style.top = pos.top + 28 + 'px';
@@ -126,111 +135,48 @@ function twitter_site() {
   };
 }
 
-function twipple_site() {
-  return {
-    init: function(options) {
-      var cont = document.getElementById('ExecutionButtonControl');
-      create_symbol_tables(options, document.getElementById('input'), cont.querySelector('div'));
-      var cont2 = document.getElementById('DefaultControl');
-      create_symbol_tables(options, document.getElementById('input2'), cont2.querySelector('span'));
-    },
-    search_status_box: function() {
-      return document.getElementById('input');
-    },
-    generate_smile_link: function() {
-      var smile_link = document.createElement('a');
-      smile_link.setAttribute('class', 'twipple-smile-link');
-      smile_link.setAttribute('href', 'javascript:void(0);');
-      var span = document.createElement('span');
-      var button_caption = document.createTextNode();
-      button_caption.nodeValue = '☺';
-      span.appendChild(button_caption);
-      span.setAttribute('style', 'font-size:15pt;');
-      smile_link.appendChild(span);
-      return smile_link;
-    },
-    setup_smile_link: function(smile_link, symbol_table, args, container) {
-      var li = document.createElement('li');
-      if (container.tagName == 'DIV') {
-        li.setAttribute('class', 'tweetAreaButtonSwitch');
-      } else {
-        li.setAttribute('class', 'tweetAreaButtonSwitch fl');
-      }
-      var ul = container.querySelector('ul');
-      li.insertBefore(smile_link, li.firstChild);
-      ul.insertBefore(li, ul.firstChild);
-      document.body.appendChild(symbol_table);
-    },
-    open_symbol_table: function(symbol_table, link, status_box) {
-      var pos = getElementPosition(link);
-      symbol_table.style.top = pos.top + 20 + 'px';
-      symbol_table.style.left = pos.left + 'px';
-      symbol_table.style.display = 'block';
-    }
-  };
-}
-
-function hootsuite_site() {
-  return {
-    init: function(options) {
-      create_symbol_tables(options);
-    },
-    search_status_box: function() {
-      return document.querySelector('textarea.messageBoxMessage');
-    },
-    generate_smile_link: function() {
-      var smile_link = document.createElement('a');
-      smile_link.setAttribute('class', 'hootsuite-smile-link');
-      var span = document.createElement('span');
-      var button_caption = document.createTextNode();
-      button_caption.nodeValue = '☺';
-      span.appendChild(button_caption);
-      smile_link.appendChild(span);
-      return smile_link;
-    },
-    setup_smile_link: function(smile_link, symbol_table, args) {
-      var buttons = document.querySelector('div#messageTools div.controls');
-      if (!buttons) {
-        console.log('Twitter Symbols: no buttons. setup stop.');
-        return;
-      }
-      buttons.insertBefore(symbol_table, buttons.firstChild);
-      buttons.insertBefore(smile_link, buttons.firstChild);
-      symbol_table.setAttribute('top', smile_link.top + smile_link.height + 'px');
-      symbol_table.setAttribute('left', smile_link.left + 'px');
-      // check symbol table. if deleted symbol table, recreate.
-      if (document.twitter_symbols___timer == undefined) {
-        document.twitter_symbols___timer = setInterval(function(){
-          var link = document.querySelector('a.hootsuite-smile-link');
-          if (!link) {
-            args.callee.apply(null, args);
-          }
-        }, 5000);
-      }
-    },
-    open_symbol_table: function(symbol_table, link, status_box) {
-      symbol_table.style.display = 'block';
-    }
-  };
-}
-
 var current_site = function(hostname){
   if (hostname.match(/twitter/)) {
     //Twitter
     return twitter_site();
-  } else if (hostname.match(/twipple/)) {
-    //Twipple
-    console.log('Twitter Symbols: tiwpple');
-    return twipple_site();
-  } else if (hostname.match(/hootsuite/)) {
-    //hootsuite
-    return hootsuite_site();
   } else {
     throw new Exception('unknown url.');
   }
 }(location.hostname);
 
 function create_symbol_tables(options, status, container, scroll_ignore) {
+  console.log('create_symbol_tables', status);
+  var status_box = status;
+  var record_range = function(){
+    var selection = window.getSelection();
+        index = 0, 
+        startPos = 0,
+        endPos = 0;
+    if (status.firstChild) {
+      for (var i = 0; i < status.firstChild.childNodes.length; i++) {
+        var n = status.firstChild.childNodes[i];
+        if (n == selection.anchorNode) {
+          startPos = index + selection.anchorOffset;
+        }
+        if (n == selection.focusNode) {
+          endPos = index + selection.focusOffset;
+        }
+        index += n.length;
+      }
+    }
+    console.log('computed range', startPos, endPos);
+
+    if (startPos) {
+      status.setAttribute('data-selection-start-position', startPos);
+    }
+    if (endPos) {
+      status.setAttribute('data-selection-end-position', endPos);
+    }
+  };
+  status.addEventListener('keyup', record_range, false);
+  status.addEventListener('focus', record_range, false);
+  status.addEventListener('click', record_range, false);
+  
   var args = arguments;
   var symbols = '♥✈☺♬☑♠☎☻♫☒♤☤☹♪♀✩✉☠✔♂★✇♺✖♨❦☁✌♛❁☪☂✏♝❀☭☃☛♞✿☮☼☚♘✾☯☾☝♖✽✝☄☟♟✺☥✂✍♕✵☉☇☈☡✠☊☋☌☍♁✇☢☣✣✡☞☜✜✛❥♈♉♊♋♌♍♎♏♐♑♒♓☬☫☨☧☦✁✃✄✎✐❂❉❆♅♇♆♙♟♔♕♖♗♘♚♛♜♝♞©®™…∞¥€£ƒ$≤≥∑«»ç∫µ◊ı∆Ω≈*§•¶¬†&¡¿øå∂œÆæπß÷‰√≠%˚ˆ˜˘¯∑ºª‽?☕⍢⍤⍥⍨';
   var cols_num = 15;
@@ -256,16 +202,55 @@ function create_symbol_tables(options, status, container, scroll_ignore) {
           console.log('Twitter Symbols: no status box. setup stop.');
           return;
         }
-        var mark_position = status_box.getAttribute('data-mark_position');
-        if (mark_position) {
-          if (status_box.value.substring(mark_position, mark_position + 1) == '_') {
-            status_box.value = status_box.value.substring(0, mark_position) + status_box.value.substring(mark_position + mark_position + 1);
+        var mark_node_index = status_box.getAttribute('data-mark-node-index');
+        console.log('mark_node_index', mark_node_index);
+        if (mark_node_index) {
+          console.log('mark node index', mark_node_index);
+          console.log('status_box', status_box.innerHTML);
+          console.log('firstChild', status_box.firstChild.innerHTML);
+          console.log('firstChild', status_box.firstChild.childNodes,  status_box.firstChild.childNodes.length);
+          console.log('p', status_box.firstChild.childNodes[0].nodeValue);
+          for (var i = 0; i < status_box.firstChild.childNodes.length; i++) {
+            var n = status_box.firstChild.childNodes[i];
+            console.log('n', n.nodeValue, 'i', i, 'index', mark_node_index);
+            if (i == mark_node_index && n.nodeValue == '_') {
+              status_box.firstChild.removeChild(n);
+            }
           }
-          status_box.removeAttribute('data-mark_position');
+          status_box.removeAttribute('data-mark-node-index');
         }
-        var pos = status_box.selectionStart;
-        status_box.value = status_box.value.substring(0, pos) + this.innerText + status_box.value.substring(pos);
-        status_box.selectionStart = pos + this.innerText.length;
+        status_box.focus();
+        var selection = window.getSelection();
+        var range = selection.getRangeAt(0);
+        //restore range
+        if (status_box.hasAttribute('data-selection-start-position') && status_box.hasAttribute('data-selection-end-position')) {
+          
+          var startPos = status_box.getAttribute('data-selection-start-position'),
+              endPos = status_box.getAttribute('data-selection-end-position');
+          console.log('restore range', startPos, endPos);
+          var index = 0; 
+          for (var i = 0; i < status_box.firstChild.childNodes.length; i++) {
+            var n = status_box.firstChild.childNodes[i];
+            console.log('n', n);
+            console.log('selection.anchorNode', selection.anchorNode);
+            if (startPos >= index && startPos <= index + n.length) {
+              range.setStart(n, startPos - index);
+            }
+            if (endPos >= index && endPos <= index + n.length) {
+              range.setEnd(n, endPos - index);
+            }
+            index += n.length;
+          }
+        }
+
+        //insert text
+        range.deleteContents();
+        range.insertNode(document.createTextNode(this.innerText));
+
+        //move cursor
+        if (selection.rangeCount > 0) {
+          selection.collapse(status_box, 1); //末尾にカーソルを設定する
+        }
         symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
         return false;
       }, false);
