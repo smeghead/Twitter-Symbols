@@ -34,6 +34,8 @@
 //2012-11-09 2.1.0 added smile button at profile bio.
 //2013-01-14 2.1.1 fixed a bug fail to insert symbols to empty statusbox.
 //2013-01-27 2.2.0 supported new twitter site design. terminated twipple and hootsuite support.
+//2013-01-27 2.2.1 fixed some bugs.
+//2013-01-27 2.2.2 fixed a bugs cannot insert facemarks.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -111,21 +113,9 @@ function twitter_site() {
     },
     open_symbol_table: function(symbol_table, link, status_box) {
       var tweet_button = link.parentElement.querySelector('.tweet-action');
-      status_box.removeAttribute('data-mark-node-index');
       if (tweet_button.className.match('disabled')) {
         status_box.focus();
-        var selection = window.getSelection();
-        var range = window.getSelection().getRangeAt(0);
-
-        range.insertNode(document.createTextNode('_'));
-        for (var i = 0; i < status_box.firstChild.childNodes.length; i++) {
-          var n = status_box.firstChild.childNodes[i];
-          console.log('mark', n);
-          if (n.nodeValue == '_') {
-            console.log('mark index', i);
-            status_box.setAttribute('data-mark-node-index', i);
-          }
-        }
+        status_box.firstChild.appendChild(document.createTextNode(''));
       }
       var pos = getElementPosition(link, symbol_table.getAttribute('data-scroll_ignore'));
       symbol_table.style.top = pos.top + 28 + 'px';
@@ -149,28 +139,43 @@ function create_symbol_tables(options, status, container, scroll_ignore) {
   var status_box = status;
   var record_range = function(){
     var selection = window.getSelection();
-        index = 0, 
-        startPos = 0,
-        endPos = 0;
+    var position_info = {index: 0};
     if (status.firstChild) {
-      for (var i = 0; i < status.firstChild.childNodes.length; i++) {
-        var n = status.firstChild.childNodes[i];
-        if (n == selection.anchorNode) {
-          startPos = index + selection.anchorOffset;
+      var count_fn = function(position_info, nodes){
+        for (var i = 0; i < nodes.length; i++) {
+          var n = nodes[i];
+          console.log('count_fn', n.nodeValue, 'node type', n.nodeType);
+          switch (n.nodeType) {
+            case 3:
+              //text node
+              console.log('text node');
+              if (n == selection.anchorNode) {
+                console.log('this is anchorNode');
+                position_info.startPos = position_info.index + selection.anchorOffset;
+              }
+              if (n == selection.focusNode) {
+                console.log('this is focusNode');
+                position_info.endPos = position_info.index + selection.focusOffset;
+              }
+              position_info.index += n.length;
+              break;
+            case 1:
+              //element node
+              position_info = count_fn(position_info, n.childNodes);
+              break;
+          }
         }
-        if (n == selection.focusNode) {
-          endPos = index + selection.focusOffset;
-        }
-        index += n.length;
-      }
+        return position_info;
+      };
+      position_info = count_fn(position_info, status.firstChild.childNodes);
     }
-    console.log('computed range', startPos, endPos);
+    console.log('computed range', position_info.startPos, position_info.endPos);
 
-    if (startPos) {
-      status.setAttribute('data-selection-start-position', startPos);
+    if (position_info.startPos) {
+      status.setAttribute('data-selection-start-position', position_info.startPos);
     }
-    if (endPos) {
-      status.setAttribute('data-selection-end-position', endPos);
+    if (position_info.endPos) {
+      status.setAttribute('data-selection-end-position', position_info.endPos);
     }
   };
   status.addEventListener('keyup', record_range, false);
@@ -182,6 +187,58 @@ function create_symbol_tables(options, status, container, scroll_ignore) {
   var cols_num = 15;
   var cols_num_smile = 3;
   var symbols_id = 'symbol_table' + new Date().getTime();
+
+  var insert_symbol = function(status_box, text){
+        status_box.focus();
+        var selection = window.getSelection();
+        var range = selection.getRangeAt(0);
+        //restore range
+        if (status_box.hasAttribute('data-selection-start-position') && status_box.hasAttribute('data-selection-end-position')) {
+          
+          var position_info = {
+            index: 0,
+            startPos: status_box.getAttribute('data-selection-start-position'),
+            endPos: status_box.getAttribute('data-selection-end-position')
+          }; 
+          console.log('restore range', position_info.startPos, position_info.endPos);
+
+          var update_range_fn = function(position_info, nodes, range){
+            for (var i = 0; i < nodes.length; i++) {
+              var n = nodes[i];
+              console.log('count_fn', n.nodeValue, 'node type', n.nodeType);
+              switch (n.nodeType) {
+                case 3:
+                  //text node
+                  console.log('text node');
+                  if (position_info.startPos >= position_info.index && position_info.startPos <= position_info.index + n.length) {
+                    range.setStart(n, position_info.startPos - position_info.index);
+                  }
+                  if (position_info.endPos >= position_info.index && position_info.endPos <= position_info.index + n.length) {
+                    range.setEnd(n, position_info.endPos - position_info.index);
+                  }
+                  position_info.index += n.length;
+                  break;
+                case 1:
+                  //element node
+                  position_info = update_range_fn(position_info, n.childNodes, range);
+                  break;
+              }
+            }
+            return position_info;
+          };
+          update_range_fn(position_info, status_box.firstChild.childNodes, range);
+        }
+
+        //insert text
+        range.deleteContents();
+        range.insertNode(document.createTextNode(text));
+
+        //move cursor
+        if (selection.rangeCount > 0) {
+          selection.collapse(status_box, 1); //末尾にカーソルを設定する
+        }
+        record_range();
+  };
   try {
     var symbol_table = document.createElement('table');
     symbol_table.setAttribute('data-scroll_ignore', scroll_ignore ? 'true' : 'false');
@@ -202,55 +259,9 @@ function create_symbol_tables(options, status, container, scroll_ignore) {
           console.log('Twitter Symbols: no status box. setup stop.');
           return;
         }
-        var mark_node_index = status_box.getAttribute('data-mark-node-index');
-        console.log('mark_node_index', mark_node_index);
-        if (mark_node_index) {
-          console.log('mark node index', mark_node_index);
-          console.log('status_box', status_box.innerHTML);
-          console.log('firstChild', status_box.firstChild.innerHTML);
-          console.log('firstChild', status_box.firstChild.childNodes,  status_box.firstChild.childNodes.length);
-          console.log('p', status_box.firstChild.childNodes[0].nodeValue);
-          for (var i = 0; i < status_box.firstChild.childNodes.length; i++) {
-            var n = status_box.firstChild.childNodes[i];
-            console.log('n', n.nodeValue, 'i', i, 'index', mark_node_index);
-            if (i == mark_node_index && n.nodeValue == '_') {
-              status_box.firstChild.removeChild(n);
-            }
-          }
-          status_box.removeAttribute('data-mark-node-index');
-        }
-        status_box.focus();
-        var selection = window.getSelection();
-        var range = selection.getRangeAt(0);
-        //restore range
-        if (status_box.hasAttribute('data-selection-start-position') && status_box.hasAttribute('data-selection-end-position')) {
-          
-          var startPos = status_box.getAttribute('data-selection-start-position'),
-              endPos = status_box.getAttribute('data-selection-end-position');
-          console.log('restore range', startPos, endPos);
-          var index = 0; 
-          for (var i = 0; i < status_box.firstChild.childNodes.length; i++) {
-            var n = status_box.firstChild.childNodes[i];
-            console.log('n', n);
-            console.log('selection.anchorNode', selection.anchorNode);
-            if (startPos >= index && startPos <= index + n.length) {
-              range.setStart(n, startPos - index);
-            }
-            if (endPos >= index && endPos <= index + n.length) {
-              range.setEnd(n, endPos - index);
-            }
-            index += n.length;
-          }
-        }
 
-        //insert text
-        range.deleteContents();
-        range.insertNode(document.createTextNode(this.innerText));
+        insert_symbol(status_box, this.innerText);
 
-        //move cursor
-        if (selection.rangeCount > 0) {
-          selection.collapse(status_box, 1); //末尾にカーソルを設定する
-        }
         symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
         return false;
       }, false);
@@ -280,8 +291,9 @@ function create_symbol_tables(options, status, container, scroll_ignore) {
         if (facemark.match(/^".*"$/)) {
           facemark = facemark.substring(1, facemark.length -1);
         }
-        status_box.value = status_box.value.substring(0, pos) + facemark + status_box.value.substring(pos);
-        status_box.selectionStart = pos + facemark.length;
+
+        insert_symbol(status_box, facemark);
+
         symbol_table.style.display = symbol_table.style.display != "block" ? "block" : "none";
       }, false);
       tr.appendChild(td);
