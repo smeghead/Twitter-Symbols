@@ -36,6 +36,7 @@
 //2013-01-27 2.2.0 supported new twitter site design. terminated twipple and hootsuite support.
 //2013-01-27 2.2.1 fixed some bugs.
 //2013-01-27 2.2.2 fixed a bugs cannot insert facemarks.
+//2013-06-30 2.2.3 make smily button big.
 
 //割り込み処理
 console.log('Twitter Symbols: initialize start.');
@@ -83,7 +84,7 @@ function twitter_site() {
     generate_smile_link: function() {
       var smile_link = document.createElement('a');
       //smile_link.setAttribute('class', 'smily-button tweet-button button');
-      smile_link.setAttribute('class', 'a-btn a-btn-m smily-button tweet-button btn');
+      smile_link.setAttribute('class', 'btn smily-button tweet-button');
       var button_caption = document.createTextNode();
       button_caption.nodeValue = '☺';
       smile_link.appendChild(button_caption);

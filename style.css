@@ -34,34 +34,13 @@ table.symbols td:hover {
   background-color: gray;
   cursor: pointer;
 }
-a.twipple-smile-link {
-  color: gray;
-  background-color: #eee;
-  -webkit-border-radius: 1px;
-  text-decoration: none;
-}
-a.twipple-smile-link span {
-  color: gray;
-}
-a.twipple-smile-link:hover {
-  text-decoration: none;
-}
-a.hootsuite-smile-link {
-}
-a.hootsuite-smile-link span {
-/*   color: #333; */
-  font-size: 15pt !important;
-  padding: 0px;
-  margin: 0px;
-}
-a.hootsuite-smile-link:hover {
-  text-decoration: none;
-}
 a.smily-button {
+  font-size: 28px;
+  vertical-align: bottom;
 /*   font-size: 18px; */
 /*  height: 11px;*/
 /*  width: 18px;*/
-  text-align: center;
+/*   text-align: center; */
   margin-right: 2px;
 }
 a.tweet-button {
